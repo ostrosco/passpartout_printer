@@ -34,5 +34,11 @@
   "change_orientation": [
     480,
     950
-  ]
+  ],
+  "color_start": [
+    615,
+    930
+  ],
+  "color_row_step": 30,
+  "color_col_step": 30
 }

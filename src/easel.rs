@@ -10,21 +10,24 @@ use self::failure::Error;
 pub type Point = (i32, i32);
 
 #[derive(Serialize, Deserialize)]
-pub struct Window {
+pub struct Easel {
     pub portrait_bounds: (Point, Point),
     pub landscape_bounds: (Point, Point),
     pub paintbrush: Point,
     pub spray_can: Point,
     pub pen: Point,
     pub change_orientation: Point,
+    pub color_start: Point,
+    pub color_row_step: i32,
+    pub color_col_step: i32,
 }
 
-impl Window {
-    pub fn new(path: String) -> Result<Window, Error> {
+impl Easel {
+    pub fn new(path: String) -> Result<Easel, Error> {
         let mut file = File::open(path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
-        let win: Window = serde_json::from_str(&contents)?;
+        let win: Easel = serde_json::from_str(&contents)?;
         Ok(win)
     }
 
