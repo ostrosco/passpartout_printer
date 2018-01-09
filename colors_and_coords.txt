@@ -1,13 +1,13 @@
-Coordinates of Easel (Portrait): (430, 120), (930, 820)
-Coordinates of Easel (Landscape): (320, 320), (1020, 820)
+Coordinates of Easel (Portrait): (431, 110), (928, 820)
+Coordinates of Easel (Landscape): (318, 320), (1028, 820)
 
 Paintbrush: 550, 925
 Spray Can: 550, 980
 Pen: 550, 1035
 Landscape: 480, 950
 
-Color Rows: 930, 960, 990
-Color Columns: 615 to 820 in steps of 30
+Color Columns (x): 615 to 820 in steps of 30
+Color Rows (y): 930, 960, 990
 
 Colors:
 - black: 0d0d0d
