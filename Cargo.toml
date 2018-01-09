@@ -1,0 +1,7 @@
+[package]
+name = "passpartout_printer"
+version = "0.1.0"
+authors = ["ostrosco <ostrosco@fastmail.fm>"]
+
+[dependencies]
+enigo = "0.0.11"

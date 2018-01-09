@@ -1,0 +1,38 @@
+Coordinates of Easel (Portrait): (430, 120), (930, 820)
+Coordinates of Easel (Landscape): (320, 320), (1020, 820)
+
+Paintbrush: 550, 925
+Spray Can: 550, 980
+Pen: 550, 1035
+Landscape: 480, 950
+
+Color Rows: 930, 960, 990
+Color Columns: 615 to 820 in steps of 30
+
+Colors:
+- black: 0d0d0d
+- nutmeg: 623200
+- falu_red: 7e0d0d
+- pumpkin: ff7f26
+- everglade: 265d38
+- cerulean: 006591
+- midnight_blue: 1c2263
+- vivid_violet: 953596
+
+- grey: 767676
+- sante_fe: b97a56
+- crimson: ed1c22
+- tangerine_yellow: ffc90d
+- chateau_green: 35ab55
+- deep_sky_blue: 00a2e8
+- free_speech_blue: 3039cc
+- orchid: d55fd7
+
+- white: e5e5e5
+- pale_goldenrod: efe4b0
+- carnation_pink: ffaec9
+- lemon: faed16
+- inch_worm: b5e61c
+- blizzard_blue: 99d9ea
+- shakespeare: 7092be
+- perfume: c1a7d7
