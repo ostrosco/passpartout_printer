@@ -31,6 +31,14 @@
     550,
     1035
   ],
+  "decrease_brush": [
+    613,
+    1037
+  ],
+  "increase_brush": [
+    796,
+    1037
+  ],
   "change_orientation": [
     480,
     950

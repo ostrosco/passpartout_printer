@@ -6,6 +6,11 @@ Spray Can: 550, 980
 Pen: 550, 1035
 Landscape: 480, 950
 
+Decrease Brush Size: (613, 1037)
+Increase Brush Size: (796, 1037)
+Number of Steps: 16
+Starting Size: 9
+
 Color Columns (x): 615 to 820 in steps of 30
 Color Rows (y): 930, 960, 990
 
