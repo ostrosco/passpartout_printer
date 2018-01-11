@@ -5,20 +5,10 @@ extern crate serde_derive;
 
 pub mod easel;
 
-use easel::Easel;
+use easel::{Color, Easel};
 use enigo::{Enigo, MouseButton, MouseControllable};
 use std::thread;
 use std::time::Duration;
-
-fn change_color(enigo: &mut Enigo, wait_time: &Duration, x: i32, y: i32) -> () {
-    // Let's change the color to everglade.
-    enigo.mouse_move_to(x, y);
-    thread::sleep(*wait_time);
-    enigo.mouse_down(MouseButton::Left);
-    thread::sleep(*wait_time);
-    enigo.mouse_up(MouseButton::Left);
-    thread::sleep(*wait_time);
-}
 
 fn main() {
     // Coordinates currently assume a resolution of 1920x1200. At some point,
@@ -37,39 +27,53 @@ fn main() {
 
     easel.change_orientation(&mut enigo, &wait_time);
     let (ul, lr) = easel.get_bounds();
-    let coords = easel.easel_coords;
-    let (everglade_x, everglade_y) = (
-        coords.color_start.0 + coords.color_col_step * 4,
-        coords.color_start.1,
-    );
-    let (pink_x, pink_y) = (
-        coords.color_start.0 + coords.color_col_step * 2,
-        coords.color_start.1 + coords.color_row_step * 2,
-    );
 
-    // Let's first change the color to pink.
-    change_color(&mut enigo, &wait_time, pink_x, pink_y);
+    // Next, shrink the brush size to 3.
+    easel.change_brush_size(3, &mut enigo, &wait_time);
 
-    // This should draw a black line across the left of the coords.
-    enigo.mouse_move_to(ul.0, ul.1);
-    thread::sleep(wait_time);
-    enigo.mouse_down(MouseButton::Left);
-    thread::sleep(wait_time);
-    enigo.mouse_move_to(ul.0, lr.1);
-    thread::sleep(wait_time);
-    enigo.mouse_up(MouseButton::Left);
-    thread::sleep(wait_time);
+    // This is an estimate of the brush size in pixels.
+    // TODO: I need to go through and find a sane way of estimating this.
+    let brush_pixel = 38;
 
-    // Now, change the color to everglade.
-    change_color(&mut enigo, &wait_time, everglade_x, everglade_y);
-
-    // Now, draw an everglade line across the right of an coords.
-    enigo.mouse_move_to(lr.0, ul.1);
-    thread::sleep(wait_time);
-    enigo.mouse_down(MouseButton::Left);
-    thread::sleep(wait_time);
-    enigo.mouse_move_to(lr.0, lr.1);
-    thread::sleep(wait_time);
-    enigo.mouse_up(MouseButton::Left);
-    thread::sleep(wait_time);
+    let col_step = (lr.0 - ul.0) / 24;
+    let colors = vec![
+        Color::Black,
+        Color::Grey,
+        Color::White,
+        Color::DarkBrown,
+        Color::Brown,
+        Color::LightBrown,
+        Color::DarkRed,
+        Color::Red,
+        Color::Pink,
+        Color::Orange,
+        Color::DarkYellow,
+        Color::Yellow,
+        Color::DarkGreen,
+        Color::Green,
+        Color::LightGreen,
+        Color::DarkBlue,
+        Color::Blue,
+        Color::LightBlue,
+        Color::DarkIndigo,
+        Color::Indigo,
+        Color::LightIndigo,
+        Color::DarkViolet,
+        Color::Violet,
+        Color::LightViolet,
+    ];
+    let mut col = 0;
+    for color in colors {
+        easel.change_color(&color, &mut enigo, &wait_time);
+        let col_coords = ul.0 + col_step * col + brush_pixel;
+        enigo.mouse_move_to(col_coords, ul.1);
+        thread::sleep(wait_time);
+        enigo.mouse_down(MouseButton::Left);
+        thread::sleep(wait_time);
+        enigo.mouse_move_to(col_coords, lr.1);
+        thread::sleep(wait_time);
+        enigo.mouse_up(MouseButton::Left);
+        thread::sleep(wait_time);
+        col += 1;
+    }
 }
