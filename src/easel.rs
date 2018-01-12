@@ -13,6 +13,7 @@ use self::enigo::{Enigo, MouseButton, MouseControllable};
 
 pub type Point = (i32, i32);
 
+#[derive(Debug)]
 pub enum Color {
     Black,
     Grey,
@@ -69,6 +70,82 @@ impl Color {
             Color::LightViolet => (7, 2),
         }
     }
+
+    fn get_hex(&self) -> i32 {
+        match *self {
+            Color::Black => 0x0d_0d_0d,
+            Color::Grey => 0x76_76_76,
+            Color::White => 0xe5_e5_e5,
+            Color::DarkBrown => 0x62_32_00,
+            Color::Brown => 0xb9_7a_56,
+            Color::LightBrown => 0xef_e4_b0,
+            Color::DarkRed => 0x7e_0d_0d,
+            Color::Red => 0xed_1c_22,
+            Color::Pink => 0xff_ae_c9,
+            Color::Orange => 0xff_7f_26,
+            Color::DarkYellow => 0xff_c9_0d,
+            Color::Yellow => 0xfa_ed_16,
+            Color::DarkGreen => 0x26_5d_38,
+            Color::Green => 0x35_ab_55,
+            Color::LightGreen => 0xb5_e6_1c,
+            Color::DarkBlue => 0x00_65_91,
+            Color::Blue => 0x00_a2_e8,
+            Color::LightBlue => 0x99_d9_ea,
+            Color::DarkIndigo => 0x1c_22_63,
+            Color::Indigo => 0x30_39_cc,
+            Color::LightIndigo => 0x70_92_be,
+            Color::DarkViolet => 0x95_35_96,
+            Color::Violet => 0xd5_5f_d7,
+            Color::LightViolet => 0xc1_a7_d7,
+        }
+    }
+
+    fn find_closest_color(color: i32) -> Color {
+        let colors = vec![
+            Color::Black,
+            Color::Grey,
+            Color::White,
+            Color::DarkBrown,
+            Color::Brown,
+            Color::LightBrown,
+            Color::DarkRed,
+            Color::Red,
+            Color::Pink,
+            Color::Orange,
+            Color::DarkYellow,
+            Color::Yellow,
+            Color::DarkGreen,
+            Color::Green,
+            Color::LightGreen,
+            Color::DarkBlue,
+            Color::Blue,
+            Color::LightBlue,
+            Color::DarkIndigo,
+            Color::Indigo,
+            Color::LightIndigo,
+            Color::DarkViolet,
+            Color::Violet,
+            Color::LightViolet,
+        ];
+        let (r, g, b) = (color >> 16 & 0xff, color >> 8 & 0xff, color & 0xff);
+        let mut closest = Color::Black;
+        let mut color_dist = 0xff_ff_ff;
+
+        // Iterate over all colors and compare the RBG values to find the
+        // closest value to the input color.
+        for col in colors {
+            let hex = col.get_hex();
+            let (col_r, col_g, col_b) =
+                (hex >> 16 & 0xff, hex >> 8 & 0xff, hex & 0xff);
+            let curr_color_dist =
+                (col_r - r).abs() + (col_g - g).abs() + (col_b - b).abs();
+            if curr_color_dist < color_dist {
+                closest = col;
+                color_dist = curr_color_dist;
+            }
+        }
+        closest
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -110,6 +187,12 @@ pub enum Orientation {
 
 const NUM_BRUSH_STEPS: i32 = 16;
 const STARTING_BRUSH: i32 = 9;
+
+#[derive(Fail, Debug)]
+pub enum EaselError {
+    #[fail(display = "Out of bounds error drawing to the easel")]
+    OutOfBounds,
+}
 
 pub struct Easel {
     pub easel_coords: EaselCoords,
@@ -198,5 +281,26 @@ impl Easel {
             thread::sleep(*wait_time);
         }
         self.brush_size = brush_size;
+    }
+
+    pub fn draw_pixel(
+        &self,
+        coords: Point,
+        color: i32,
+        enigo: &mut Enigo,
+        wait_time: &Duration,
+    ) -> Result<(), Error> {
+        let closest_color = Color::find_closest_color(color);
+
+        // Translate the coordinates of the picture to coordinates of the easel.
+        let (start, end) = self.get_bounds();
+        let coords = (start.0 + coords.0, start.1 + coords.1);
+        if coords.0 > end.0 || coords.1 > end.1 {
+            Err(EaselError::OutOfBounds)?
+        }
+
+        self.change_color(&closest_color, enigo, wait_time);
+        move_and_click(coords.0, coords.1, enigo, wait_time);
+        Ok(())
     }
 }

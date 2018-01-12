@@ -2,6 +2,8 @@ extern crate enigo;
 extern crate failure;
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate failure_derive;
 
 pub mod easel;
 
@@ -62,10 +64,9 @@ fn main() {
         Color::Violet,
         Color::LightViolet,
     ];
-    let mut col = 0;
-    for color in colors {
-        easel.change_color(&color, &mut enigo, &wait_time);
-        let col_coords = ul.0 + col_step * col + brush_pixel;
+    for (col, color) in colors.iter().enumerate() {
+        easel.change_color(color, &mut enigo, &wait_time);
+        let col_coords = ul.0 + col_step * (col as i32 + 1) + brush_pixel;
         enigo.mouse_move_to(col_coords, ul.1);
         thread::sleep(wait_time);
         enigo.mouse_down(MouseButton::Left);
@@ -74,6 +75,15 @@ fn main() {
         thread::sleep(wait_time);
         enigo.mouse_up(MouseButton::Left);
         thread::sleep(wait_time);
-        col += 1;
+    }
+
+    let pixel_colors = vec![
+        0xff_ff_ff, 0xc0_c0_c0, 0x80_80_80, 0x00_00_00, 0xff_00_00, 0x80_00_00, 0xff_ff_00,
+        0x80_80_00, 0x00_ff_00, 0x00_80_00, 0x00_ff_ff, 0x00_80_80, 0x00_00_ff, 0x00_00_80,
+        0xff_00_ff, 0x80_00_80,
+    ];
+    for (col, color) in pixel_colors.iter().enumerate() {
+        let coords = (((col as i32 + 1) * 30), 300);
+        easel.draw_pixel(coords, *color, &mut enigo, &wait_time).unwrap();
     }
 }
