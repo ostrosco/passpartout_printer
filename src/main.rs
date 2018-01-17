@@ -30,8 +30,8 @@ fn main() {
     easel.change_orientation(&mut enigo, &wait_time);
     let (ul, lr) = easel.get_bounds();
 
-    // Next, shrink the brush size to 3.
-    easel.change_brush_size(3, &mut enigo, &wait_time);
+    // Next, shrink the brush size to 0.
+    easel.change_brush_size(0, &mut enigo, &wait_time);
 
     // This is an estimate of the brush size in pixels.
     // TODO: I need to go through and find a sane way of estimating this.

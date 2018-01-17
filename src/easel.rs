@@ -268,7 +268,7 @@ impl Easel {
     ) {
         // Make sure that we aren't going to accidentally set an internal
         // brush size greater or smaller than what the game supports.
-        let brush_size = brush_size.max(1).min(NUM_BRUSH_STEPS);
+        let brush_size = brush_size.max(0).min(NUM_BRUSH_STEPS);
         let brush_coords = if brush_size > self.brush_size {
             self.easel_coords.increase_brush
         } else {
