@@ -19,7 +19,6 @@ pub fn draw_image(
     easel.change_brush_size(0, enigo, wait_time);
     easel.change_orientation(enigo, wait_time);
 
-    // Experiment!
     let mut current_color = easel.current_color;
     let mut start_x = 0;
     let mut start_y = 0;
@@ -50,7 +49,6 @@ pub fn draw_image(
                 enigo,
                 wait_time,
             )?;
-            println!("new start: {} {}", x, y);
             start_x = x;
             start_y = y;
             current_color = closest_color;
