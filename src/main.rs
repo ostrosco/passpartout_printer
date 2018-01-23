@@ -18,7 +18,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
 
 fn main() {
-    let quit_thread = thread::spawn(move || {
+    thread::spawn(move || {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
         let _window =
@@ -52,6 +52,5 @@ fn main() {
         ).unwrap();
     });
 
-    quit_thread.join().unwrap();
     draw_thread.join().unwrap();
 }
