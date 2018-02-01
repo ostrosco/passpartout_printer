@@ -3,7 +3,7 @@ extern crate failure;
 extern crate image;
 
 use self::failure::Error;
-use easel::{Color, Easel};
+use easel::{Color, Easel, Orientation};
 use enigo::Enigo;
 use std::time::Duration;
 use self::image::Pixel;
@@ -17,12 +17,16 @@ pub fn draw_image(
     let mut easel = Easel::new(easel_config)?;
     let mut image = image::open(image_path)?.to_rgb();
     easel.change_brush_size(0, enigo, wait_time);
-    easel.change_orientation(enigo, wait_time);
+    let (size_x, size_y) = image.dimensions();
+
+    if (size_x > size_y && easel.orientation == Orientation::Portrait) || 
+        (size_y > size_x && easel.orientation == Orientation::Landscape) {
+        easel.change_orientation(enigo, wait_time);
+    }
 
     let mut current_color = easel.current_color;
     let mut start_x = 0;
     let mut start_y = 0;
-    let (size_x, _) = image.dimensions();
     for (x, y, pixel) in image.enumerate_pixels_mut() {
         let rgb = pixel.to_rgb().data;
         let rgb = (rgb[0], rgb[1], rgb[2]);

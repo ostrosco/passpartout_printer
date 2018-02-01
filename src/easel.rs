@@ -185,6 +185,7 @@ impl EaselCoords {
     }
 }
 
+#[derive(PartialEq)]
 pub enum Orientation {
     Portrait,
     Landscape,
