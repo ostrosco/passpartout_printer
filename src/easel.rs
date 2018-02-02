@@ -10,7 +10,7 @@ use std::time::Duration;
 use std::thread;
 use self::failure::Error;
 use self::enigo::{Enigo, MouseButton, MouseControllable};
-use std::i16;
+use std::f32;
 
 pub type Point = (i32, i32);
 
@@ -128,22 +128,23 @@ impl Color {
             Color::Violet,
             Color::LightViolet,
         ];
-        let r = i16::from(color.0);
-        let g = i16::from(color.1);
-        let b = i16::from(color.2);
+        let r = f32::from(color.0);
+        let g = f32::from(color.1);
+        let b = f32::from(color.2);
 
         let mut closest = Color::Black;
-        let mut color_dist = i16::MAX;
+        let mut color_dist = f32::MAX;
 
         // Iterate over all colors and compare the RBG values to find the
         // closest value to the input color.
         for col in colors {
             let hex = col.get_hex();
-            let col_r = i16::from(hex.0);
-            let col_g = i16::from(hex.1);
-            let col_b = i16::from(hex.2);
-            let curr_color_dist =
-                (col_r - r).abs() + (col_g - g).abs() + (col_b - b).abs();
+            let col_r = f32::from(hex.0);
+            let col_g = f32::from(hex.1);
+            let col_b = f32::from(hex.2);
+            let curr_color_dist = ((col_r - r).powi(2) + (col_g - g).powi(2)
+                + (col_b - b).powi(2))
+                .sqrt();
             if curr_color_dist < color_dist {
                 closest = col;
                 color_dist = curr_color_dist;
