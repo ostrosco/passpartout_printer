@@ -7,6 +7,9 @@ use easel::{Color, Easel, Orientation};
 use enigo::Enigo;
 use std::time::Duration;
 use self::image::Pixel;
+use self::image::DynamicImage;
+use self::image::FilterType;
+use self::image::GenericImage;
 
 pub fn draw_image(
     image_path: &str,
@@ -15,11 +18,11 @@ pub fn draw_image(
     wait_time: &Duration,
 ) -> Result<(), Error> {
     let mut easel = Easel::new(easel_config)?;
-    let mut image = image::open(image_path)?.to_rgb();
+    let mut image = size_to_easel(image::open(image_path)?, &easel).to_rgb();
     let brush_wait = Duration::from_millis(32);
     easel.change_brush_size(0, enigo, &brush_wait);
-    let (size_x, size_y) = image.dimensions();
 
+    let (size_x, size_y) = image.dimensions();
     if (size_x > size_y && easel.orientation == Orientation::Portrait)
         || (size_y > size_x && easel.orientation == Orientation::Landscape)
     {
@@ -62,3 +65,16 @@ pub fn draw_image(
     }
     Ok(())
 }
+
+pub fn size_to_easel(image: DynamicImage, easel: &Easel) -> DynamicImage {
+    let (size_x, size_y) = image.dimensions();
+    let (ul_corner, br_corner) = if size_x > size_y {
+        easel.easel_coords.landscape_bounds
+    } else {
+        easel.easel_coords.portrait_bounds
+    };
+    let x_bounds = br_corner.0 - ul_corner.0;
+    let y_bounds = br_corner.1 - ul_corner.1;
+    image.resize(x_bounds as u32, y_bounds as u32, FilterType::Lanczos3)
+}
+
