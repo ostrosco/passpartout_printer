@@ -16,11 +16,13 @@ pub fn draw_image(
 ) -> Result<(), Error> {
     let mut easel = Easel::new(easel_config)?;
     let mut image = image::open(image_path)?.to_rgb();
-    easel.change_brush_size(0, enigo, wait_time);
+    let brush_wait = Duration::from_millis(32);
+    easel.change_brush_size(0, enigo, &brush_wait);
     let (size_x, size_y) = image.dimensions();
 
-    if (size_x > size_y && easel.orientation == Orientation::Portrait) || 
-        (size_y > size_x && easel.orientation == Orientation::Landscape) {
+    if (size_x > size_y && easel.orientation == Orientation::Portrait)
+        || (size_y > size_x && easel.orientation == Orientation::Landscape)
+    {
         easel.change_orientation(enigo, wait_time);
     }
 
