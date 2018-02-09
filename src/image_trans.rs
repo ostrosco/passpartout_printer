@@ -2,71 +2,12 @@ extern crate enigo;
 extern crate failure;
 extern crate image;
 
-use self::failure::Error;
-use easel::{Color, Easel, Orientation};
-use enigo::Enigo;
-use std::time::Duration;
-use self::image::Pixel;
+use easel::Easel;
 use self::image::DynamicImage;
 use self::image::FilterType;
 use self::image::GenericImage;
 
-pub fn draw_image(
-    image_path: &str,
-    easel_config: String,
-    enigo: &mut Enigo,
-    wait_time: &Duration,
-) -> Result<(), Error> {
-    let mut easel = Easel::new(easel_config)?;
-    let mut image = size_to_easel(image::open(image_path)?, &easel).to_rgb();
-    let brush_wait = Duration::from_millis(32);
-    easel.change_brush_size(0, enigo, &brush_wait);
-
-    let (size_x, size_y) = image.dimensions();
-    if (size_x > size_y && easel.orientation == Orientation::Portrait)
-        || (size_y > size_x && easel.orientation == Orientation::Landscape)
-    {
-        easel.change_orientation(enigo, wait_time);
-    }
-
-    let mut current_color = easel.current_color;
-    let mut start_x = 0;
-    let mut start_y = 0;
-    for (x, y, pixel) in image.enumerate_pixels_mut() {
-        let rgb = pixel.to_rgb().data;
-        let rgb = (rgb[0], rgb[1], rgb[2]);
-        let closest_color = Color::find_closest_color(rgb);
-
-        // If we've hit the end of a row, draw the previous row.
-        if y > start_y {
-            easel.draw_line(
-                (start_x as i32, start_y as i32),
-                (size_x as i32, start_y as i32),
-                &current_color,
-                enigo,
-                wait_time,
-            )?;
-            start_x = x;
-            start_y = y;
-            current_color = closest_color;
-        }
-        if closest_color != current_color {
-            easel.draw_line(
-                (start_x as i32, start_y as i32),
-                (x as i32, y as i32),
-                &current_color,
-                enigo,
-                wait_time,
-            )?;
-            start_x = x;
-            start_y = y;
-            current_color = closest_color;
-        }
-    }
-    Ok(())
-}
-
-pub fn size_to_easel(image: DynamicImage, easel: &Easel) -> DynamicImage {
+pub fn size_to_easel(image: &DynamicImage, easel: &Easel) -> DynamicImage {
     let (size_x, size_y) = image.dimensions();
     let (ul_corner, br_corner) = if size_x > size_y {
         easel.easel_coords.landscape_bounds
@@ -77,4 +18,3 @@ pub fn size_to_easel(image: DynamicImage, easel: &Easel) -> DynamicImage {
     let y_bounds = br_corner.1 - ul_corner.1;
     image.resize(x_bounds as u32, y_bounds as u32, FilterType::Lanczos3)
 }
-
