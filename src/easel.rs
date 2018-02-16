@@ -12,7 +12,7 @@ use self::failure::Error;
 use self::enigo::{Enigo, MouseButton, MouseControllable};
 use colors::{Palette, PaletteColor, Point};
 use image::imageops::ColorMap;
-use image::Rgb;
+use image::Rgba;
 
 #[derive(Serialize, Deserialize)]
 pub struct EaselCoords {
@@ -165,7 +165,7 @@ impl Easel {
     pub fn draw_pixel(
         &mut self,
         coords: Point,
-        color: &Rgb<u8>,
+        color: &Rgba<u8>,
     ) -> Result<(), Error> {
         let palette = Palette::new();
         let closest_color = palette.colormap[palette.index_of(color)];

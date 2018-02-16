@@ -74,7 +74,7 @@ fn app() -> Result<(), Error> {
     let wait_time = Duration::from_millis(mouse_wait);
     let enigo = Enigo::new();
     let mut easel = Easel::new(easel_config, enigo, wait_time)?;
-    let mut image = size_to_easel(&image::open(image_path)?, &easel).to_rgb();
+    let mut image = size_to_easel(&image::open(image_path)?, &easel).to_rgba();
     let palette = Palette::new();
     if enable_dither {
         dither(&mut image, &palette);
@@ -118,8 +118,8 @@ fn app() -> Result<(), Error> {
             }
         }
 
-        let rgb = pixel.to_rgb();
-        let closest_color = palette.colormap[palette.index_of(&rgb)];
+        let rgba = pixel.to_rgba();
+        let closest_color = palette.colormap[palette.index_of(&rgba)];
 
         // If we've hit the end of a row, draw the rest of the row before
         // moving on to the next row.
