@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate clap;
 extern crate enigo;
 extern crate failure;
 #[macro_use]
@@ -9,17 +11,21 @@ extern crate serde_derive;
 
 pub mod easel;
 pub mod image_trans;
+pub mod colors;
 
 use enigo::Enigo;
 use image_trans::size_to_easel;
 use failure::Error;
-use std::env;
 use std::time::Duration;
 use std::thread;
 use std::u64;
 use std::sync::mpsc;
+use image::imageops::ColorMap;
+use image::imageops::dither;
+use clap::App;
 
-use easel::{Color, Easel, Orientation};
+use easel::{Easel, Orientation};
+use colors::{Palette, PaletteColor};
 use image::Pixel;
 
 fn app() -> Result<(), Error> {
@@ -45,24 +51,42 @@ fn app() -> Result<(), Error> {
         });
     });
 
+    let matches = App::new("Passpartout Printer")
+        .version("0.1.0")
+        .args_from_usage(
+            "-w, --mouse-wait=[WAIT] 'Specify the time to wait between mouse actions'
+            --enable-dither 'Enables dithering to reduce color banding but increase draw time'
+            <IMAGE> 'Input image to use'")
+        .get_matches();
+
     let easel_config = String::from("coords.json");
-    let picture: String = env::args().nth(1).unwrap();
-    let duration: u64 = match env::args().nth(2) {
-        Some(v) => v.parse().unwrap(),
-        None => 10_u64,
+    let image_path: String = matches.value_of("IMAGE").unwrap().to_string();
+    let mouse_wait: u64 = value_t!(matches, "mouse-wait", u64).unwrap_or(7);
+    let enable_dither: bool = match matches.occurrences_of("enable-dither") {
+        0 => false,
+        _ => true,
     };
-    let wait_time = Duration::from_millis(duration);
-    let mut enigo = Enigo::new();
-    let mut easel = Easel::new(easel_config)?;
-    let mut image = size_to_easel(&image::open(picture)?, &easel).to_rgb();
-    let brush_wait = Duration::from_millis(32);
-    easel.change_brush_size(0, &mut enigo, &brush_wait);
+    println!("Printing to Passpartout with the following settings:");
+    println!("-- image: {}", image_path);
+    println!("-- mouse wait: {}", mouse_wait);
+    println!("-- dithering: {}\n", enable_dither);
+
+    let wait_time = Duration::from_millis(mouse_wait);
+    let enigo = Enigo::new();
+    let mut easel = Easel::new(easel_config, enigo, wait_time)?;
+    let mut image = size_to_easel(&image::open(image_path)?, &easel).to_rgb();
+    let palette = Palette::new();
+    if enable_dither {
+        dither(&mut image, &palette);
+    }
+
+    easel.change_brush_size(0);
 
     let (size_x, size_y) = image.dimensions();
     if (size_x > size_y && easel.orientation == Orientation::Portrait)
         || (size_y > size_x && easel.orientation == Orientation::Landscape)
     {
-        easel.change_orientation(&mut enigo, &wait_time);
+        easel.change_orientation();
     }
 
     let (ulcorner, lrcorner) = easel.get_bounds();
@@ -94,9 +118,8 @@ fn app() -> Result<(), Error> {
             }
         }
 
-        let rgb = pixel.to_rgb().data;
-        let rgb = (rgb[0], rgb[1], rgb[2]);
-        let closest_color = Color::find_closest_color(rgb);
+        let rgb = pixel.to_rgb();
+        let closest_color = palette.colormap[palette.index_of(&rgb)];
 
         // If we've hit the end of a row, draw the rest of the row before
         // moving on to the next row.
@@ -105,18 +128,14 @@ fn app() -> Result<(), Error> {
                 (start_x, start_y),
                 (size_x, start_y),
                 &current_color,
-                &mut enigo,
-                &wait_time,
             )?;
             if size_x < easel_x {
                 easel.draw_line(
                     (size_x + 1, start_y),
                     (easel_x, start_y),
-                    &Color::White,
-                    &mut enigo,
-                    &wait_time,
+                    &PaletteColor::White,
                 )?;
-                easel.change_color(&closest_color, &mut enigo, &wait_time);
+                easel.change_color(&closest_color);
             }
             start_x = x;
             start_y = y;
@@ -129,8 +148,6 @@ fn app() -> Result<(), Error> {
                 (start_x, start_y),
                 (x - 1, y),
                 &current_color,
-                &mut enigo,
-                &wait_time,
             )?;
             start_x = x;
             start_y = y;
@@ -143,9 +160,7 @@ fn app() -> Result<(), Error> {
         easel.draw_line(
             (size_x, 0),
             (size_x, size_y),
-            &Color::White,
-            &mut enigo,
-            &wait_time,
+            &PaletteColor::White,
         )?;
     }
 
@@ -156,9 +171,7 @@ fn app() -> Result<(), Error> {
             easel.draw_line(
                 (0, iy),
                 (easel_x, iy),
-                &Color::White,
-                &mut enigo,
-                &wait_time,
+                &PaletteColor::White,
             )?;
         }
     }
