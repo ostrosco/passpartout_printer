@@ -149,9 +149,12 @@ impl Palette {
             let col_g = f32::from(hex[1]);
             let col_b = f32::from(hex[2]);
             let col_a = f32::from(hex[3]);
-            let col_r_diff = (col_r - r).powi(2).max((col_r - r - col_a + a).powi(2));
-            let col_g_diff = (col_g - g).powi(2).max((col_g - g - col_a + a).powi(2));
-            let col_b_diff = (col_b - b).powi(2).max((col_b - b - col_a + a).powi(2));
+            let col_r_diff =
+                (col_r - r).powi(2).max((col_r - r - col_a + a).powi(2));
+            let col_g_diff =
+                (col_g - g).powi(2).max((col_g - g - col_a + a).powi(2));
+            let col_b_diff =
+                (col_b - b).powi(2).max((col_b - b - col_a + a).powi(2));
             let curr_color_dist = (col_r_diff + col_g_diff + col_b_diff).sqrt();
             if curr_color_dist < color_dist {
                 index = ix;

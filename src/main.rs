@@ -12,6 +12,7 @@ extern crate serde_derive;
 pub mod easel;
 pub mod image_trans;
 pub mod colors;
+pub mod manual_config;
 
 use enigo::Enigo;
 use image_trans::size_to_easel;
@@ -29,6 +30,19 @@ use colors::{Palette, PaletteColor};
 use image::Pixel;
 
 fn app() -> Result<(), Error> {
+    let matches = App::new("Passpartout Printer")
+        .version("0.1.0")
+        .args_from_usage(
+            "-w, --mouse-wait=[WAIT] 'Specify the time to wait between mouse actions'
+            --configure 'Configures the application with coordinates in-game.'
+            --enable-dither 'Enables dithering to reduce color banding but increase draw time'
+            <IMAGE> 'Input image to use'")
+        .get_matches();
+
+    if matches.occurrences_of("configure") > 0 {
+        return manual_config::create_config("coords.json");
+    }
+
     let (tx, rx) = mpsc::channel();
 
     // A simple event loop to search for the escape key to pause drawing.
@@ -50,14 +64,6 @@ fn app() -> Result<(), Error> {
             glutin::ControlFlow::Continue
         });
     });
-
-    let matches = App::new("Passpartout Printer")
-        .version("0.1.0")
-        .args_from_usage(
-            "-w, --mouse-wait=[WAIT] 'Specify the time to wait between mouse actions'
-            --enable-dither 'Enables dithering to reduce color banding but increase draw time'
-            <IMAGE> 'Input image to use'")
-        .get_matches();
 
     let easel_config = String::from("coords.json");
     let image_path: String = matches.value_of("IMAGE").unwrap().to_string();
@@ -144,11 +150,7 @@ fn app() -> Result<(), Error> {
 
         // If there's a color change, draw the line up to this pixel and stop.
         if closest_color != current_color {
-            easel.draw_line(
-                (start_x, start_y),
-                (x - 1, y),
-                &current_color,
-            )?;
+            easel.draw_line((start_x, start_y), (x - 1, y), &current_color)?;
             start_x = x;
             start_y = y;
             current_color = closest_color;
@@ -157,22 +159,14 @@ fn app() -> Result<(), Error> {
 
     // Clean up the right-most edge of the picture if one exists.
     if size_x < easel_x {
-        easel.draw_line(
-            (size_x, 0),
-            (size_x, size_y),
-            &PaletteColor::White,
-        )?;
+        easel.draw_line((size_x, 0), (size_x, size_y), &PaletteColor::White)?;
     }
 
     // Once we've hit the end of the picture, tidy up the bottom by drawing
     // white lines to fill in the entire canvas.
     if size_y < easel_y {
         for iy in size_y..easel_y {
-            easel.draw_line(
-                (0, iy),
-                (easel_x, iy),
-                &PaletteColor::White,
-            )?;
+            easel.draw_line((0, iy), (easel_x, iy), &PaletteColor::White)?;
         }
     }
 

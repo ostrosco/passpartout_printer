@@ -71,7 +71,11 @@ pub struct Easel {
 }
 
 impl Easel {
-    pub fn new(path: String, mouse: Enigo, mouse_wait: Duration) -> Result<Easel, Error> {
+    pub fn new(
+        path: String,
+        mouse: Enigo,
+        mouse_wait: Duration,
+    ) -> Result<Easel, Error> {
         let easel_coords = EaselCoords::new(path)?;
         let orientation = Orientation::Portrait;
         Ok(Easel {
@@ -101,9 +105,7 @@ impl Easel {
         self.click(None);
     }
 
-    pub fn change_orientation(
-        &mut self,
-    ) {
+    pub fn change_orientation(&mut self) {
         let orient_coords = self.easel_coords.change_orientation;
         self.move_and_click(orient_coords.0, orient_coords.1);
         self.orientation = match self.orientation {
@@ -119,10 +121,7 @@ impl Easel {
         }
     }
 
-    pub fn change_color(
-        &mut self,
-        color: &PaletteColor,
-    ) {
+    pub fn change_color(&mut self, color: &PaletteColor) {
         if *color != self.current_color {
             let (row, col) = color.get_row_col();
             let row_step = self.easel_coords.color_row_step;
@@ -136,15 +135,12 @@ impl Easel {
         }
     }
 
-    pub fn change_brush_size(
-        &mut self,
-        brush_size: i32,
-    ) {
+    pub fn change_brush_size(&mut self, brush_size: i32) {
         // For some reason, changing the brush size is very inconsistent
         // at speeds faster than 32 ms, so we slow down here only for
         // brush change sizes.
         let mouse_wait = Duration::from_millis(32);
-        
+
         // Make sure that we aren't going to accidentally set an internal
         // brush size greater or smaller than what the game supports.
         let brush_size = brush_size.max(0).min(NUM_BRUSH_STEPS);
