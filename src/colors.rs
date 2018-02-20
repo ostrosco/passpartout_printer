@@ -71,30 +71,30 @@ impl PaletteColor {
 
     pub fn get_rgba(&self) -> Rgba<u8> {
         let data = match *self {
-            PaletteColor::Black => [0x0d, 0x0d, 0x0d, 0x00],
-            PaletteColor::Grey => [0x76, 0x76, 0x76, 0x00],
-            PaletteColor::White => [0xe5, 0xe5, 0xe5, 0x00],
-            PaletteColor::DarkBrown => [0x62, 0x32, 0x00, 0x00],
-            PaletteColor::Brown => [0xb9, 0x7a, 0x56, 0x00],
-            PaletteColor::LightBrown => [0xef, 0xe4, 0xb0, 0x00],
-            PaletteColor::DarkRed => [0x7e, 0x0d, 0x0d, 0x00],
-            PaletteColor::Red => [0xed, 0x1c, 0x22, 0x00],
-            PaletteColor::Pink => [0xff, 0xae, 0xc9, 0x00],
-            PaletteColor::Orange => [0xff, 0x7f, 0x26, 0x00],
-            PaletteColor::DarkYellow => [0xff, 0xc9, 0x0d, 0x00],
-            PaletteColor::Yellow => [0xfa, 0xed, 0x16, 0x00],
-            PaletteColor::DarkGreen => [0x26, 0x5d, 0x38, 0x00],
-            PaletteColor::Green => [0x35, 0xab, 0x55, 0x00],
-            PaletteColor::LightGreen => [0xb5, 0xe6, 0x1c, 0x00],
-            PaletteColor::DarkBlue => [0x00, 0x65, 0x91, 0x00],
-            PaletteColor::Blue => [0x00, 0xa2, 0xe8, 0x00],
-            PaletteColor::LightBlue => [0x99, 0xd9, 0xea, 0x00],
-            PaletteColor::DarkIndigo => [0x1c, 0x22, 0x63, 0x00],
-            PaletteColor::Indigo => [0x30, 0x39, 0xcc, 0x00],
-            PaletteColor::LightIndigo => [0x70, 0x92, 0xbe, 0x00],
-            PaletteColor::DarkViolet => [0x95, 0x35, 0x96, 0x00],
-            PaletteColor::Violet => [0xd5, 0x5f, 0xd7, 0x00],
-            PaletteColor::LightViolet => [0xc1, 0xa7, 0xd7, 0x00],
+            PaletteColor::Black => [0x0d, 0x0d, 0x0d, 0xff],
+            PaletteColor::Grey => [0x76, 0x76, 0x76, 0xff],
+            PaletteColor::White => [0xe5, 0xe5, 0xe5, 0xff],
+            PaletteColor::DarkBrown => [0x62, 0x32, 0x00, 0xff],
+            PaletteColor::Brown => [0xb9, 0x7a, 0x56, 0xff],
+            PaletteColor::LightBrown => [0xef, 0xe4, 0xb0, 0xff],
+            PaletteColor::DarkRed => [0x7e, 0x0d, 0x0d, 0xff],
+            PaletteColor::Red => [0xed, 0x1c, 0x22, 0xff],
+            PaletteColor::Pink => [0xff, 0xae, 0xc9, 0xff],
+            PaletteColor::Orange => [0xff, 0x7f, 0x26, 0xff],
+            PaletteColor::DarkYellow => [0xff, 0xc9, 0x0d, 0xff],
+            PaletteColor::Yellow => [0xfa, 0xed, 0x16, 0xff],
+            PaletteColor::DarkGreen => [0x26, 0x5d, 0x38, 0xff],
+            PaletteColor::Green => [0x35, 0xab, 0x55, 0xff],
+            PaletteColor::LightGreen => [0xb5, 0xe6, 0x1c, 0xff],
+            PaletteColor::DarkBlue => [0x00, 0x65, 0x91, 0xff],
+            PaletteColor::Blue => [0x00, 0xa2, 0xe8, 0xff],
+            PaletteColor::LightBlue => [0x99, 0xd9, 0xea, 0xff],
+            PaletteColor::DarkIndigo => [0x1c, 0x22, 0x63, 0xff],
+            PaletteColor::Indigo => [0x30, 0x39, 0xcc, 0xff],
+            PaletteColor::LightIndigo => [0x70, 0x92, 0xbe, 0xff],
+            PaletteColor::DarkViolet => [0x95, 0x35, 0x96, 0xff],
+            PaletteColor::Violet => [0xd5, 0x5f, 0xd7, 0xff],
+            PaletteColor::LightViolet => [0xc1, 0xa7, 0xd7, 0xff],
         };
         Rgba { data: data }
     }
@@ -150,11 +150,11 @@ impl Palette {
             let col_b = f32::from(hex[2]);
             let col_a = f32::from(hex[3]);
             let col_r_diff =
-                (col_r - r).powi(2).max((col_r - r - col_a + a).powi(2));
+                (col_r - r).powi(2).max((col_r - r + col_a - a).powi(2));
             let col_g_diff =
-                (col_g - g).powi(2).max((col_g - g - col_a + a).powi(2));
+                (col_g - g).powi(2).max((col_g - g + col_a - a).powi(2));
             let col_b_diff =
-                (col_b - b).powi(2).max((col_b - b - col_a + a).powi(2));
+                (col_b - b).powi(2).max((col_b - b + col_a - a).powi(2));
             let curr_color_dist = (col_r_diff + col_g_diff + col_b_diff).sqrt();
             if curr_color_dist < color_dist {
                 index = ix;
