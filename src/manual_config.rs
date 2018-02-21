@@ -6,6 +6,7 @@ use easel::EaselCoords;
 use std::thread;
 use std::time::Duration;
 use failure::Error;
+use self::mouse_coords::MouseQuery;
 
 pub fn create_config(path: &str) -> Result<(), Error> {
     println!("This will walk you through creation of a configuration file.");
@@ -82,7 +83,7 @@ pub fn get_pos() -> (i32, i32) {
     use glutin::Event::DeviceEvent;
     let mut events_loop = glutin::EventsLoop::new();
     let mut mouse_pos = (0, 0);
-    let mut mouse_coords = mouse_coords::linux::MouseCoords::new();
+    let mouse_coords = mouse_coords::MouseCoords::new();
 
     let mut running = true;
     while running {
