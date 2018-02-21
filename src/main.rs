@@ -101,13 +101,27 @@ fn app() -> Result<(), Error> {
 
     let size_x = size_x as i32;
     let size_y = size_y as i32;
+    //
+    // Offsets used to center the image as best as possible on the easel.
+    let offset_x = (easel_x - size_x + 1) / 2;
+    let offset_y = (easel_y - size_y) / 2;
+
+    let mut start_x = offset_x;
+    let mut start_y = offset_y;
+    for ix in 0..offset_y {
+        easel.draw_line(
+            (0, ix),
+            (size_x, ix),
+            &PaletteColor::White,
+        )?;
+    }
     let mut current_color = easel.current_color;
-    let mut start_x = 0_i32;
-    let mut start_y = 0_i32;
+
+    println!("start_x: {}, offset_x: {}, size_x: {}, easel_x: {}", start_x, offset_x, size_x, easel_x);
     let mut paused = false;
     for (x, y, pixel) in image.enumerate_pixels_mut() {
-        let x = x as i32;
-        let y = y as i32;
+        let x = x as i32 + offset_x;
+        let y = y as i32 + offset_y;
         // Loop to handle pausing drawing so the user can actually get control
         // of their machine again.
         loop {
@@ -132,17 +146,9 @@ fn app() -> Result<(), Error> {
         if y > start_y {
             easel.draw_line(
                 (start_x, start_y),
-                (size_x, start_y),
+                (size_x + offset_x, start_y),
                 &current_color,
             )?;
-            if size_x < easel_x {
-                easel.draw_line(
-                    (size_x + 1, start_y),
-                    (easel_x, start_y),
-                    &PaletteColor::White,
-                )?;
-                easel.change_color(&closest_color);
-            }
             start_x = x;
             start_y = y;
             current_color = closest_color;
@@ -157,15 +163,28 @@ fn app() -> Result<(), Error> {
         }
     }
 
+    // Clean up the left-most edge of the picture if one exists.
+    if offset_x != 0 {
+        easel.draw_line((offset_x - 1, 0), (offset_x - 1, size_y), &PaletteColor::White)?;
+        for ix in 0..size_y {
+            easel.draw_line((0, ix), (offset_x - 1, ix), &PaletteColor::White)?;
+        }
+    }
+
     // Clean up the right-most edge of the picture if one exists.
-    if size_x < easel_x {
-        easel.draw_line((size_x, 0), (size_x, size_y), &PaletteColor::White)?;
+    let right_edge = size_x + offset_x;
+    if right_edge < easel_x {
+        easel.draw_line((right_edge, 0), (right_edge, size_y), &PaletteColor::White)?;
+        for ix in 0..size_y {
+            easel.draw_line((right_edge, ix), (easel_x, ix), &PaletteColor::White)?;
+        }
     }
 
     // Once we've hit the end of the picture, tidy up the bottom by drawing
     // white lines to fill in the entire canvas.
-    if size_y < easel_y {
-        for iy in size_y..easel_y {
+    let bottom_edge = size_y + offset_y;
+    if bottom_edge < easel_y {
+        for iy in bottom_edge..easel_y {
             easel.draw_line((0, iy), (easel_x, iy), &PaletteColor::White)?;
         }
     }
