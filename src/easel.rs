@@ -52,8 +52,13 @@ pub enum Orientation {
     Landscape,
 }
 
+/// The number of brush steps we can take when resizing.
 const NUM_BRUSH_STEPS: i32 = 16;
+
+/// From a fresh boot of the game, the brush size starts at step 9.
 const STARTING_BRUSH: i32 = 9;
+
+/// From a fresh boot of the game, the brush color starts as black.
 const STARTING_COLOR: PaletteColor = PaletteColor::Black;
 
 #[derive(Fail, Debug)]
@@ -62,15 +67,43 @@ pub enum EaselError {
 }
 
 pub struct Easel {
+    /// The enigo object for manipulating the mouse.
     pub mouse: Enigo,
+
+    /// The amount of time to wait between mouse moves and clicks.
     pub mouse_wait: Duration,
+
+    /// A mapping of where elements of the easel are in screen coordinates.
     pub easel_coords: EaselCoords,
+
+    /// The current orientation of the easel: landscape or portrait.
     pub orientation: Orientation,
+
+    /// The current brush size.
     pub brush_size: i32,
+
+    /// The active color of the brush.
     pub current_color: PaletteColor,
 }
 
 impl Easel {
+    /// Create a new easel. When creating a new easel, it's important to set
+    /// the mouse wait properly. If you start seeing lines being drawn from
+    /// the easel towards the color palette, you likely need to increase the
+    /// mouse wait time.
+    ///
+    /// Initial experimentation has shown that, regardless of
+    /// FPS, anything lower than 6 ms causes the game to not recognize that
+    /// the mouse button has been released and will make many, many mistakes
+    /// in drawing.
+    ///
+    /// # Arguments
+    ///
+    /// * `path`: Path to the JSON file containing the coordinates of easel
+    ///           elements in-game.
+    /// * `mouse`: An Enigo structure used to manipulate the mouse position.
+    /// * `mouse_wait`: The time to wait between mouse operations.
+    ///
     pub fn new(
         path: String,
         mouse: Enigo,
@@ -105,6 +138,7 @@ impl Easel {
         self.click(None);
     }
 
+    /// Toggles the orientation of the easel.
     pub fn change_orientation(&mut self) {
         let orient_coords = self.easel_coords.change_orientation;
         self.move_and_click(orient_coords.0, orient_coords.1);
@@ -114,6 +148,7 @@ impl Easel {
         };
     }
 
+    /// Returns the current bounds of the easel in screen coordinates.
     pub fn get_bounds(&self) -> (Point, Point) {
         match self.orientation {
             Orientation::Portrait => self.easel_coords.portrait_bounds,
@@ -121,6 +156,8 @@ impl Easel {
         }
     }
 
+    /// Changes from the current color to the desired color. Does nothing
+    /// if the current color is the same as the desired color.
     pub fn change_color(&mut self, color: &PaletteColor) {
         if *color != self.current_color {
             let (row, col) = color.get_row_col();
@@ -135,6 +172,24 @@ impl Easel {
         }
     }
 
+    /// Changes the brush size in fixed steps by clicking on the brushes
+    /// to increase or decrease the size.
+    ///
+    /// # Arguments
+    ///
+    /// * `brush_size` - The size from 0 to `NUM_BRUSH_STEPS` to change the
+    ///    brush size to.
+    ///
+    /// # Example
+    /// ```no_run
+    /// use easel::*;
+    /// use enigo::*;
+    /// use std::time::Duration;
+    ///
+    /// let mut easel = Easel::new("coords.json", Enigo::new(),
+    ///     Duration::from_millis(6));
+    /// easel.change_brush_size(0); // shrinks the brush to it's minimum size
+    /// ```
     pub fn change_brush_size(&mut self, brush_size: i32) {
         // For some reason, changing the brush size is very inconsistent
         // at speeds faster than 32 ms, so we slow down here only for
@@ -158,6 +213,28 @@ impl Easel {
         self.brush_size = brush_size;
     }
 
+    /// Draws a single pixel as the specified coordinates.
+    ///
+    /// # Arguments
+    ///
+    /// * `coords`: The coordinates of the pixel from the input image.
+    /// * `color`: The RBGA color to draw to the pixel.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use easel::*;
+    /// use enigo::*;
+    /// use std::time::Duration;
+    /// use image::Rgba;
+    ///
+    /// // Draw a black pixel in the upper-left corner of the easel.
+    /// let mut easel = Easel::new("coords.json", Enigo::new(),
+    ///     Duration::from_millis(6));
+    /// let color = Rgba { data = [0, 0, 0, 255] };
+    /// let coords = (0, 0);
+    /// easel.draw_pixel(coords, &color);
+    /// ```
     pub fn draw_pixel(
         &mut self,
         coords: Point,
@@ -182,6 +259,31 @@ impl Easel {
         Ok(())
     }
 
+    /// Draws a line on the easel of the particular color.
+    ///
+    /// # Arguments
+    ///
+    /// * `start_line`: The starting point of the line in image coordinates.
+    /// * `end_line`: The end point of the line in image coordinates.
+    /// * `color`: The color of the line.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use easel::*;
+    /// use enigo::*;
+    /// use std::time::Duration;
+    /// use image::Rgba;
+    ///
+    /// // Draw a black diagonal line from the upper-left corner
+    /// // 100 pixels away.
+    /// let mut easel = Easel::new("coords.json", Enigo::new(),
+    ///     Duration::from_millis(6));
+    /// let color = Rgba { data = [0, 0, 0, 255] };
+    /// let start = (0, 0);
+    /// let end = (100, 100);
+    /// easel.draw_line(start, end, &color);
+    /// ```
     pub fn draw_line(
         &mut self,
         start_line: Point,
