@@ -89,13 +89,14 @@ pub fn get_pos() -> (i32, i32) {
     while running {
         events_loop.poll_events(|event| {
             if let DeviceEvent { event, .. } = event {
-                if let glutin::DeviceEvent::Button { button, state, .. } = event {
+                if let glutin::DeviceEvent::Button { button, state, .. } = event
+                {
                     if button == 1 && state == ElementState::Pressed {
                         mouse_pos = mouse_coords.get_coords();
                         running = false;
                     }
                 }
-            } 
+            }
         });
     }
     thread::sleep(Duration::from_secs(1));

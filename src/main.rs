@@ -109,15 +109,10 @@ fn app() -> Result<(), Error> {
     let mut start_x = offset_x;
     let mut start_y = offset_y;
     for ix in 0..offset_y {
-        easel.draw_line(
-            (0, ix),
-            (size_x, ix),
-            &PaletteColor::White,
-        )?;
+        easel.draw_line((0, ix), (size_x, ix), &PaletteColor::White)?;
     }
     let mut current_color = easel.current_color;
 
-    println!("start_x: {}, offset_x: {}, size_x: {}, easel_x: {}", start_x, offset_x, size_x, easel_x);
     let mut paused = false;
     for (x, y, pixel) in image.enumerate_pixels_mut() {
         let x = x as i32 + offset_x;
@@ -165,7 +160,11 @@ fn app() -> Result<(), Error> {
 
     // Clean up the left-most edge of the picture if one exists.
     if offset_x != 0 {
-        easel.draw_line((offset_x - 1, 0), (offset_x - 1, size_y), &PaletteColor::White)?;
+        easel.draw_line(
+            (offset_x - 1, 0),
+            (offset_x - 1, size_y),
+            &PaletteColor::White,
+        )?;
         for ix in 0..size_y {
             easel.draw_line((0, ix), (offset_x - 1, ix), &PaletteColor::White)?;
         }
@@ -174,9 +173,17 @@ fn app() -> Result<(), Error> {
     // Clean up the right-most edge of the picture if one exists.
     let right_edge = size_x + offset_x;
     if right_edge < easel_x {
-        easel.draw_line((right_edge, 0), (right_edge, size_y), &PaletteColor::White)?;
+        easel.draw_line(
+            (right_edge, 0),
+            (right_edge, size_y),
+            &PaletteColor::White,
+        )?;
         for ix in 0..size_y {
-            easel.draw_line((right_edge, ix), (easel_x, ix), &PaletteColor::White)?;
+            easel.draw_line(
+                (right_edge, ix),
+                (easel_x, ix),
+                &PaletteColor::White,
+            )?;
         }
     }
 
