@@ -83,7 +83,9 @@ fn app() -> Result<(), Error> {
     println!("Printing to Passpartout with the following settings:");
     println!("-- image: {}", image_path);
     println!("-- mouse wait: {}", mouse_wait);
-    println!("-- dithering: {}\n", enable_dither);
+    println!("-- dithering: {}", enable_dither);
+    println!("-- image scaling: {}", enable_scale);
+    println!("");
 
     let wait_time = Duration::from_millis(mouse_wait);
     let enigo = Enigo::new();
