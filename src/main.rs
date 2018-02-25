@@ -36,7 +36,7 @@ fn app() -> Result<(), Error> {
             "-w, --mouse-wait=[WAIT] 'Specify the time to wait between mouse actions'
             --configure 'Configures the application with coordinates in-game.'
             --enable-dither 'Enables dithering to reduce color banding but increase draw time'
-            <IMAGE> 'Input image to use'")
+            -i, --image=[IMAGE] 'Input image to use'")
         .get_matches();
 
     if matches.occurrences_of("configure") > 0 {
@@ -66,7 +66,10 @@ fn app() -> Result<(), Error> {
     });
 
     let easel_config = String::from("coords.json");
-    let image_path: String = matches.value_of("IMAGE").unwrap().to_string();
+    let image_path: String = matches
+        .value_of("image")
+        .expect("Please enter a path to the image to draw.")
+        .to_string();
     let mouse_wait: u64 = value_t!(matches, "mouse-wait", u64).unwrap_or(7);
     let enable_dither: bool = match matches.occurrences_of("enable-dither") {
         0 => false,
