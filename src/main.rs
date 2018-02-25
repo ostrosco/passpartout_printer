@@ -53,7 +53,7 @@ fn app() -> Result<(), Error> {
             if let Event::DeviceEvent { event, .. } = event {
                 if let DeviceEvent::Key(key) = event {
                     if let (
-                        Some(VirtualKeyCode::Escape),
+                        Some(VirtualKeyCode::Space),
                         ElementState::Released,
                     ) = (key.virtual_keycode, key.state)
                     {
