@@ -164,7 +164,7 @@ dependencies = [
 [[package]]
 name = "device_query"
 version = "0.1.0"
-source = "git+https://github.com/ostrosco/device_query#9f09b7f022e6398d102bcb04448b8749f73edf70"
+source = "git+https://github.com/ostrosco/device_query#d46f5d83de4a0af94887ece1a7eb99e8b920554c"
 dependencies = [
  "pkg-config 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "user32-sys 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",

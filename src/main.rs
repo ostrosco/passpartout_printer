@@ -50,11 +50,16 @@ fn app() -> Result<(), Error> {
     // A simple event loop to search for the escape key to pause drawing.
     thread::spawn(move || {
         let device_state = DeviceState::new();
+        let mut prev = false;
         loop {
             let key_pressed = device_state.get_keys();
             if key_pressed.contains(&Keycode::Space) {
+                prev = true; 
+            } else if prev {
+                prev = false;
                 tx.send(()).unwrap();
             }
+            thread::sleep(Duration::from_millis(100));
         }
     });
 
