@@ -11,6 +11,5 @@ serde_json = "1.0"
 failure = "0.1"
 failure_derive = "0.1"
 image = "0.18"
-glutin = "0.12.1"
 clap = "2.30.0"
-mouse_coords = {git="https://github.com/ostrosco/mouse_coords"}
+device_query = {git="https://github.com/ostrosco/device_query"}

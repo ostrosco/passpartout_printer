@@ -4,10 +4,10 @@ extern crate enigo;
 extern crate failure;
 #[macro_use]
 extern crate failure_derive;
-extern crate glutin;
 extern crate image;
 #[macro_use]
 extern crate serde_derive;
+extern crate device_query;
 
 pub mod easel;
 pub mod image_drawer;
@@ -24,6 +24,7 @@ use std::u64;
 use std::sync::mpsc;
 use image::imageops::dither;
 use clap::App;
+use device_query::{DeviceState, DeviceQuery, Keycode};
 
 use easel::Easel;
 use colors::Palette;
@@ -48,22 +49,13 @@ fn app() -> Result<(), Error> {
 
     // A simple event loop to search for the escape key to pause drawing.
     thread::spawn(move || {
-        use glutin::{DeviceEvent, ElementState, Event, VirtualKeyCode};
-        let mut events_loop = glutin::EventsLoop::new();
-        events_loop.run_forever(|event| {
-            if let Event::DeviceEvent { event, .. } = event {
-                if let DeviceEvent::Key(key) = event {
-                    if let (
-                        Some(VirtualKeyCode::Space),
-                        ElementState::Released,
-                    ) = (key.virtual_keycode, key.state)
-                    {
-                        tx.send(()).unwrap();
-                    }
-                }
+        let device_state = DeviceState::new();
+        loop {
+            let key_pressed = device_state.get_keys();
+            if key_pressed.contains(&Keycode::Space) {
+                tx.send(()).unwrap();
             }
-            glutin::ControlFlow::Continue
-        });
+        }
     });
 
     let easel_config = String::from("coords.json");

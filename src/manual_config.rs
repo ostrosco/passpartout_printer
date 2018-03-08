@@ -1,12 +1,11 @@
 extern crate failure;
-extern crate glutin;
-extern crate mouse_coords;
+extern crate device_query;
 
 use easel::EaselCoords;
 use std::thread;
 use std::time::Duration;
 use failure::Error;
-use self::mouse_coords::MouseQuery;
+use self::device_query::DeviceQuery;
 
 pub fn create_config(path: &str) -> Result<(), Error> {
     println!("This will walk you through creation of a configuration file.");
@@ -79,25 +78,16 @@ pub fn create_config(path: &str) -> Result<(), Error> {
 }
 
 pub fn get_pos() -> (i32, i32) {
-    use glutin::ElementState;
-    use glutin::Event::DeviceEvent;
-    let mut events_loop = glutin::EventsLoop::new();
     let mut mouse_pos = (0, 0);
-    let mouse_coords = mouse_coords::MouseCoords::new();
+    let device_query = device_query::DeviceState::new();
 
     let mut running = true;
     while running {
-        events_loop.poll_events(|event| {
-            if let DeviceEvent { event, .. } = event {
-                if let glutin::DeviceEvent::Button { button, state, .. } = event
-                {
-                    if button == 1 && state == ElementState::Pressed {
-                        mouse_pos = mouse_coords.get_coords();
-                        running = false;
-                    }
-                }
-            }
-        });
+        let mouse_state = device_query.get_coords();
+        if mouse_state.button_pressed.get(1) == Some(&true) {
+            mouse_pos = mouse_state.coords;
+            running = false;
+        }
     }
     thread::sleep(Duration::from_secs(1));
     return mouse_pos;
