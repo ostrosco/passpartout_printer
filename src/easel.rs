@@ -52,6 +52,13 @@ pub enum Orientation {
     Landscape,
 }
 
+#[derive(PartialEq)]
+pub enum Tool {
+    Paintbrush,
+    Pen,
+    Spraycan,
+}
+
 /// The number of brush steps we can take when resizing.
 const NUM_BRUSH_STEPS: i32 = 16;
 
@@ -60,6 +67,9 @@ const STARTING_BRUSH: i32 = 9;
 
 /// From a fresh boot of the game, the brush color starts as black.
 const STARTING_COLOR: PaletteColor = PaletteColor::Black;
+
+/// From a fresh boot of the game, the paintbrush is the active tool.
+const STARTING_TOOL: Tool = Tool::Paintbrush;
 
 #[derive(Fail, Debug)]
 pub enum EaselError {
@@ -84,6 +94,9 @@ pub struct Easel {
 
     /// The active color of the brush.
     pub current_color: PaletteColor,
+
+    /// The active tool for drawing.
+    pub current_tool: Tool,
 }
 
 impl Easel {
@@ -118,6 +131,7 @@ impl Easel {
             orientation: orientation,
             brush_size: STARTING_BRUSH,
             current_color: STARTING_COLOR,
+            current_tool: STARTING_TOOL,
         })
     }
 
@@ -146,6 +160,20 @@ impl Easel {
             Orientation::Portrait => Orientation::Landscape,
             Orientation::Landscape => Orientation::Portrait,
         };
+    }
+
+    /// Changes the current tool.
+    pub fn change_tool(&mut self, tool: Tool) {
+        if tool == self.current_tool {
+            return;
+        }
+        let coords = match tool {
+            Tool::Paintbrush => self.easel_coords.paintbrush,
+            Tool::Pen => self.easel_coords.pen,
+            Tool::Spraycan => self.easel_coords.spray_can,
+        };
+        self.move_and_click(coords.0, coords.1);
+        self.current_tool = tool;
     }
 
     /// Returns the current bounds of the easel in screen coordinates.
@@ -302,6 +330,9 @@ impl Easel {
             Err(EaselError::OutOfBounds)?
         }
 
+        // In order to get a better defined left-edge of the line, we'll
+        // switch to the pen for the first part of the line, then draw the
+        // rest with the paintbrush for speed.
         self.change_color(color);
         self.mouse.mouse_move_to(start_draw.0, start_draw.1);
         thread::sleep(self.mouse_wait);
@@ -311,6 +342,7 @@ impl Easel {
         thread::sleep(self.mouse_wait);
         self.mouse.mouse_up(MouseButton::Left);
         thread::sleep(self.mouse_wait);
+
         Ok(())
     }
 }
