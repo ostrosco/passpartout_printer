@@ -2,33 +2,26 @@
 extern crate clap;
 extern crate enigo;
 extern crate failure;
-#[macro_use]
-extern crate failure_derive;
 extern crate image;
-#[macro_use]
-extern crate serde_derive;
 extern crate device_query;
-
-pub mod easel;
-pub mod image_drawer;
-pub mod colors;
-pub mod manual_config;
+extern crate passpartout_printer;
 
 use enigo::Enigo;
-use image_drawer::size_to_easel;
-use image_drawer::ImageDrawer;
 use failure::Error;
 use std::time::Duration;
 use std::thread;
 use std::u64;
 use std::sync::mpsc;
 use image::imageops::dither;
+use image::Pixel;
 use clap::App;
 use device_query::{DeviceState, DeviceQuery, Keycode};
 
-use easel::Easel;
-use colors::Palette;
-use image::Pixel;
+use passpartout_printer::manual_config;
+use passpartout_printer::easel::Easel;
+use passpartout_printer::colors::Palette;
+use passpartout_printer::image_drawer::size_to_easel;
+use passpartout_printer::image_drawer::ImageDrawer;
 
 fn app() -> Result<(), Error> {
     let matches = App::new("Passpartout Printer")
