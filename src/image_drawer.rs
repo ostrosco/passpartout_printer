@@ -63,8 +63,8 @@ impl<'a> ImageDrawer<'a> {
         let current_color = easel.current_color;
 
         let (ulcorner, lrcorner) = easel.get_bounds();
-        let easel_y = lrcorner.1 - ulcorner.1 - 1;
         let easel_x = lrcorner.0 - ulcorner.0 - 1;
+        let easel_y = lrcorner.1 - ulcorner.1 - 1;
 
         let size_x = size_x as i32;
         let size_y = size_y as i32;
@@ -197,9 +197,8 @@ impl<'a> ImageDrawer<'a> {
 
         // Once we've hit the end of the picture, tidy up the bottom by drawing
         // white lines to fill in the entire canvas.
-        let bottom_edge = self.size_y + self.offset_y + 1;
-        if bottom_edge < self.easel_y {
-            for iy in bottom_edge..self.easel_y {
+        if self.start_y < self.easel_y {
+            for iy in self.start_y..self.easel_y {
                 self.easel.draw_line(
                     (0, iy),
                     (self.easel_x, iy),
