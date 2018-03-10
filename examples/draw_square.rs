@@ -13,7 +13,7 @@ fn app() -> Result<(), Error> {
     let mut easel = Easel::new("../coords.json".to_string(), enigo, Duration::from_millis(6))?;
     easel.change_brush_size(0);
     let points = vec![(100, 100), (100, 150), (150, 150), (150, 100)];
-    easel.draw_shape(points, &PaletteColor::Red, false)
+    easel.draw_shape(points, &PaletteColor::Red, true)
 }
 
 fn main() { 
