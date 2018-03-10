@@ -163,7 +163,7 @@ impl<'a> ImageDrawer<'a> {
     pub fn cleanup_image(&mut self) -> Result<(), Error> {
         // Clean up the left-most edge of the picture if one exists.
         let left_edge = self.offset_x - 1;
-        if left_edge != 0 {
+        if left_edge > 0 {
             self.easel.draw_line(
                 (left_edge, 0),
                 (left_edge, self.size_y),
