@@ -74,6 +74,7 @@ const STARTING_TOOL: Tool = Tool::Paintbrush;
 #[derive(Fail, Debug)]
 pub enum EaselError {
     #[fail(display = "Out of bounds error drawing to the easel")] OutOfBounds,
+    #[fail(display = "Drawing requires at least one point.")] NoPoints,
 }
 
 pub struct Easel {
@@ -319,27 +320,54 @@ impl Easel {
         color: &PaletteColor,
     ) -> Result<(), Error> {
         // Translate the coordinates of the picture to coordinates of the easel.
-        let (start, end) = self.get_bounds();
-        let start_draw = ((start.0 + start_line.0), (start.1 + start_line.1));
-        if start_draw.0 > end.0 || start_draw.1 > end.1 {
-            Err(EaselError::OutOfBounds)?
-        }
+        self.draw_shape(vec![start_line, end_line], color, false)
+    }
 
-        let end_draw = ((start.0 + end_line.0), (start.1 + end_line.1));
-        if end_draw.0 > end.0 || end_draw.1 > end.1 {
-            Err(EaselError::OutOfBounds)?
-        }
-
-        // In order to get a better defined left-edge of the line, we'll
-        // switch to the pen for the first part of the line, then draw the
-        // rest with the paintbrush for speed.
+    /// Draws an arbitrary shape to the easel. This draws the shape as one
+    /// continuous stroke.
+    ///
+    /// # Arguments
+    ///
+    /// * `points`: The points defining the polygon.
+    /// * `color`: The color of the shape.
+    /// * `close_shape`: Whether or not to connect the first and last points.
+    ///
+    pub fn draw_shape(
+        &mut self,
+        points: Vec<Point>,
+        color: &PaletteColor,
+        close_shape: bool,
+    ) -> Result<(), Error> {
+        let (start, end) = self.get_bounds(); 
         self.change_color(color);
-        self.mouse.mouse_move_to(start_draw.0, start_draw.1);
+
+        let start_point = match points.get(0) {
+            Some(p) => p,
+            None => Err(EaselError::NoPoints)?,
+        };
+
+        let start_point = ((start.0 + start_point.0), (start.1 + start_point.1));
+        if start_point.0 > end.0 || start_point.1 > end.1 {
+            Err(EaselError::OutOfBounds)?
+        }
+
+        self.mouse.mouse_move_to(start_point.0, start_point.1);
         thread::sleep(self.mouse_wait);
         self.mouse.mouse_down(MouseButton::Left);
-        thread::sleep(self.mouse_wait);
-        self.mouse.mouse_move_to(end_draw.0, end_draw.1);
-        thread::sleep(self.mouse_wait);
+        for point in &points {
+            let point = ((start.0 + point.0), (start.1 + point.1));
+            if point.0 > end.0 || point.1 > end.1 {
+                Err(EaselError::OutOfBounds)?
+            }
+            self.mouse.mouse_move_to(point.0, point.1);   
+            thread::sleep(self.mouse_wait);
+        }
+
+        if close_shape {
+            self.mouse.mouse_move_to(start_point.0, start_point.1);
+            thread::sleep(self.mouse_wait);
+        }
+
         self.mouse.mouse_up(MouseButton::Left);
         thread::sleep(self.mouse_wait);
 

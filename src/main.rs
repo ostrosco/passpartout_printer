@@ -52,7 +52,6 @@ fn app() -> Result<(), Error> {
                 prev = false;
                 tx.send(()).unwrap();
             }
-            thread::sleep(Duration::from_millis(100));
         }
     });
 
