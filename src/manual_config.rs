@@ -1,5 +1,5 @@
-extern crate failure;
 extern crate device_query;
+extern crate failure;
 
 use easel::EaselCoords;
 use std::thread;
@@ -90,5 +90,5 @@ pub fn get_pos() -> (i32, i32) {
         }
     }
     thread::sleep(Duration::from_secs(1));
-    return mouse_pos;
+    mouse_pos
 }

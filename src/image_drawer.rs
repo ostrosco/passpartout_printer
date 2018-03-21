@@ -107,7 +107,6 @@ impl<'a> ImageDrawer<'a> {
         Ok(())
     }
 
-    #[inline(always)]
     /// Process the next pixel from a given image.
     ///
     /// Pixels are not drawn to the screen unless we've hit the end of a row
@@ -129,7 +128,7 @@ impl<'a> ImageDrawer<'a> {
     ) -> Result<(), Error> {
         let x = x as i32 + self.offset_x;
         let y = y as i32 + self.offset_y;
-        let closest_color = self.palette.colormap[self.palette.index_of(&rgba)];
+        let closest_color = self.palette.colormap[self.palette.index_of(rgba)];
 
         // If we've hit the end of a row, draw the rest of the row before
         // moving on to the next row.

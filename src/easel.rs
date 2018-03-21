@@ -320,7 +320,7 @@ impl Easel {
         color: &PaletteColor,
     ) -> Result<(), Error> {
         // Translate the coordinates of the picture to coordinates of the easel.
-        self.draw_shape(vec![start_line, end_line], color, false)
+        self.draw_shape(&[start_line, end_line], color, false)
     }
 
     /// Draws an arbitrary shape to the easel. This draws the shape as one
@@ -334,11 +334,11 @@ impl Easel {
     ///
     pub fn draw_shape(
         &mut self,
-        points: Vec<Point>,
+        points: &[Point],
         color: &PaletteColor,
         close_shape: bool,
     ) -> Result<(), Error> {
-        let (start, end) = self.get_bounds(); 
+        let (start, end) = self.get_bounds();
         self.change_color(color);
 
         let start_point = match points.get(0) {
@@ -346,7 +346,8 @@ impl Easel {
             None => Err(EaselError::NoPoints)?,
         };
 
-        let start_point = ((start.0 + start_point.0), (start.1 + start_point.1));
+        let start_point =
+            ((start.0 + start_point.0), (start.1 + start_point.1));
         if start_point.0 > end.0 || start_point.1 > end.1 {
             Err(EaselError::OutOfBounds)?
         }
@@ -354,12 +355,12 @@ impl Easel {
         self.mouse.mouse_move_to(start_point.0, start_point.1);
         thread::sleep(self.mouse_wait);
         self.mouse.mouse_down(MouseButton::Left);
-        for point in &points {
+        for point in points.iter() {
             let point = ((start.0 + point.0), (start.1 + point.1));
             if point.0 > end.0 || point.1 > end.1 {
                 Err(EaselError::OutOfBounds)?
             }
-            self.mouse.mouse_move_to(point.0, point.1);   
+            self.mouse.mouse_move_to(point.0, point.1);
             thread::sleep(self.mouse_wait);
         }
 

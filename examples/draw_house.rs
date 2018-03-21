@@ -1,6 +1,6 @@
-extern crate passpartout_printer;
 extern crate enigo;
 extern crate failure;
+extern crate passpartout_printer;
 
 use std::time::Duration;
 use enigo::Enigo;
@@ -10,15 +10,19 @@ use failure::Error;
 
 fn app() -> Result<(), Error> {
     let enigo = Enigo::new();
-    let mut easel = Easel::new("../coords.json".to_string(), enigo, Duration::from_millis(6))?;
+    let mut easel = Easel::new(
+        "../coords.json".to_string(),
+        enigo,
+        Duration::from_millis(6),
+    )?;
     easel.change_brush_size(0);
-    let points = vec![(100, 100), (100, 150), (150, 150), (150, 100)];
-    easel.draw_shape(points, &PaletteColor::Red, true)?;
-    let points = vec![(125, 50), (100, 100), (150, 100)];
-    easel.draw_shape(points, &PaletteColor::Blue, true)?;
+    let points = [(100, 100), (100, 150), (150, 150), (150, 100)];
+    easel.draw_shape(&points, &PaletteColor::Red, true)?;
+    let points = [(125, 50), (100, 100), (150, 100)];
+    easel.draw_shape(&points, &PaletteColor::Blue, true)?;
     Ok(())
 }
 
-fn main() { 
-    app();
+fn main() {
+    app().unwrap();
 }

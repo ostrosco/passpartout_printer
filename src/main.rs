@@ -1,9 +1,9 @@
 #[macro_use]
 extern crate clap;
+extern crate device_query;
 extern crate enigo;
 extern crate failure;
 extern crate image;
-extern crate device_query;
 extern crate passpartout_printer;
 
 use enigo::Enigo;
@@ -15,7 +15,7 @@ use std::sync::mpsc;
 use image::imageops::dither;
 use image::Pixel;
 use clap::App;
-use device_query::{DeviceState, DeviceQuery, Keycode};
+use device_query::{DeviceQuery, DeviceState, Keycode};
 
 use passpartout_printer::manual_config;
 use passpartout_printer::easel::Easel;
@@ -47,7 +47,7 @@ fn app() -> Result<(), Error> {
         loop {
             let key_pressed = device_state.get_keys();
             if key_pressed.contains(&Keycode::Space) {
-                prev = true; 
+                prev = true;
             } else if prev {
                 prev = false;
                 tx.send(()).unwrap();
@@ -74,7 +74,7 @@ fn app() -> Result<(), Error> {
     println!("-- mouse wait: {}", mouse_wait);
     println!("-- dithering: {}", enable_dither);
     println!("-- image scaling: {}", enable_scale);
-    println!("");
+    println!();
 
     let wait_time = Duration::from_millis(mouse_wait);
     let enigo = Enigo::new();
