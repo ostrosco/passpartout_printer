@@ -6,6 +6,7 @@ use std::thread;
 use std::time::Duration;
 use failure::Error;
 use self::device_query::DeviceQuery;
+use coords::Coord;
 
 pub fn create_config(path: &str) -> Result<(), Error> {
     println!("This will walk you through creation of a configuration file.");
@@ -57,8 +58,8 @@ pub fn create_config(path: &str) -> Result<(), Error> {
     println!("Please click on dark brown.");
     let dark_brown = get_pos();
 
-    let color_row_step = dark_brown.0 - color_start.0;
-    let color_col_step = grey.1 - color_start.1;
+    let color_row_step = dark_brown.x - color_start.y;
+    let color_col_step = grey.y - color_start.y;
 
     let easel_coords = EaselCoords {
         portrait_bounds: (portrait_ul, portrait_lr),
@@ -77,7 +78,7 @@ pub fn create_config(path: &str) -> Result<(), Error> {
     easel_coords.save(path)
 }
 
-pub fn get_pos() -> (i32, i32) {
+pub fn get_pos() -> Coord {
     let mut mouse_pos = (0, 0);
     let device_query = device_query::DeviceState::new();
 
@@ -90,5 +91,5 @@ pub fn get_pos() -> (i32, i32) {
         }
     }
     thread::sleep(Duration::from_secs(1));
-    mouse_pos
+    Coord::from(mouse_pos)
 }
