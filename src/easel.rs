@@ -383,6 +383,9 @@ impl Easel {
     }
 
     /// Use the scanline polygon fill algorithm to fill in the polygon.
+    /// 
+    /// * `points` List of coordinates that define the polygon to fill.
+    /// * `color` The color to fill the polygon with.
     ///
     fn fill(
         &mut self,
