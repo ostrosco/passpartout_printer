@@ -17,9 +17,22 @@ fn app() -> Result<(), Error> {
     )?;
     easel.change_brush_size(0);
     let points = [(100, 100), (100, 150), (150, 150), (150, 100)];
-    easel.draw_shape(&points, &PaletteColor::Red, true)?;
+    easel.draw_shape(&points, &PaletteColor::Red, true, true)?;
     let points = [(125, 50), (100, 100), (150, 100)];
-    easel.draw_shape(&points, &PaletteColor::Blue, true)?;
+    easel.draw_shape(&points, &PaletteColor::Blue, true, true)?;
+    let points = [
+        (200, 200),
+        (150, 250),
+        (100, 250),
+        (150, 300),
+        (125, 350),
+        (200, 300),
+        (250, 350),
+        (225, 300),
+        (300, 250),
+        (250, 250),
+    ];
+    easel.draw_shape(&points, &PaletteColor::Yellow, true, true)?;
     Ok(())
 }
 

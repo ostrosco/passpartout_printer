@@ -6,6 +6,7 @@ extern crate serde_json;
 
 use std::io::{Read, Write};
 use std::fs::File;
+use std::f32;
 use std::time::Duration;
 use std::thread;
 use self::failure::Error;
@@ -320,7 +321,7 @@ impl Easel {
         color: &PaletteColor,
     ) -> Result<(), Error> {
         // Translate the coordinates of the picture to coordinates of the easel.
-        self.draw_shape(&[start_line, end_line], color, false)
+        self.draw_shape(&[start_line, end_line], color, false, false)
     }
 
     /// Draws an arbitrary shape to the easel. This draws the shape as one
@@ -331,12 +332,14 @@ impl Easel {
     /// * `points`: The points defining the polygon.
     /// * `color`: The color of the shape.
     /// * `close_shape`: Whether or not to connect the first and last points.
+    /// * `fill`: Whether or not to fill the shape. Implies close_shape.
     ///
     pub fn draw_shape(
         &mut self,
         points: &[Point],
         color: &PaletteColor,
         close_shape: bool,
+        fill: bool,
     ) -> Result<(), Error> {
         let (start, end) = self.get_bounds();
         self.change_color(color);
@@ -364,7 +367,7 @@ impl Easel {
             thread::sleep(self.mouse_wait);
         }
 
-        if close_shape {
+        if close_shape || fill {
             self.mouse.mouse_move_to(start_point.0, start_point.1);
             thread::sleep(self.mouse_wait);
         }
@@ -372,6 +375,73 @@ impl Easel {
         self.mouse.mouse_up(MouseButton::Left);
         thread::sleep(self.mouse_wait);
 
+        if fill {
+            self.fill(points, color)?;
+        }
+
+        Ok(())
+    }
+
+    /// Use the scanline polygon fill algorithm to fill in the polygon.
+    ///
+    fn fill(
+        &mut self,
+        points: &[Point],
+        color: &PaletteColor,
+    ) -> Result<(), Error> {
+        let mut edges: Vec<[Point; 2]> =
+            points.windows(2).map(|pts| [pts[0], pts[1]]).collect();
+        edges.push([*points.first().unwrap(), *points.last().unwrap()]);
+        let slope: Vec<f32> = edges
+            .iter()
+            .map(|pts| {
+                if pts[1].0 == pts[0].0 {
+                    0.0
+                } else {
+                    (pts[1].1 - pts[0].1) as f32 / (pts[1].0 - pts[0].0) as f32
+                }
+            })
+            .collect();
+        let start_y = points.iter().fold(10_000, |acc, pnt| acc.min(pnt.1));
+        let end_y = points.iter().fold(0, |acc, pnt| acc.max(pnt.1));
+        let mut iy = start_y;
+        let old_brush_size = self.brush_size;
+        self.change_brush_size(0);
+
+        while iy < end_y {
+            let mut active_edges = vec![];
+            for (edge, slope) in edges.iter().zip(slope.iter()) {
+                let max = edge[0].1.max(edge[1].1);
+                let min = edge[0].1.min(edge[1].1);
+                if max > iy && min < iy && max != min {
+                    active_edges.push((edge, slope));
+                }
+            }
+            let x_draw: Vec<i32> = active_edges
+                .iter()
+                .map(|&(pts, m)| {
+                    if *m == 0.0 {
+                        pts[0].0
+                    } else {
+                        (pts[0].0 as f32 + 1.0 / m * (iy - pts[0].1) as f32)
+                            as i32
+                    }
+                })
+                .collect();
+            let mut in_poly = true;
+            for x in x_draw.windows(2) {
+                if x[0] != x[1] && in_poly {
+                    self.draw_line((x[0], iy), (x[1], iy), color)?;
+                }
+                in_poly = !in_poly;
+            }
+
+            // Since the brush size is 0, we increment by half of the brush
+            // size, or 6 pixels.
+            iy += 6;
+        }
+
+        self.change_brush_size(old_brush_size);
         Ok(())
     }
 }
