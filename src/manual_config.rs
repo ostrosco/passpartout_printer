@@ -58,7 +58,7 @@ pub fn create_config(path: &str) -> Result<(), Error> {
     println!("Please click on dark brown.");
     let dark_brown = get_pos();
 
-    let color_row_step = dark_brown.x - color_start.y;
+    let color_row_step = dark_brown.x - color_start.x;
     let color_col_step = grey.y - color_start.y;
 
     let easel_coords = EaselCoords {

@@ -2,7 +2,7 @@ extern crate enigo;
 extern crate failure;
 extern crate image;
 
-use easel::{Easel, Orientation};
+use easel::{Easel, Orientation, Tool};
 use colors::{Palette, PaletteColor};
 use coords::Coord;
 use self::image::DynamicImage;
@@ -54,6 +54,7 @@ impl<'a> ImageDrawer<'a> {
     ) -> ImageDrawer<'a> {
         // For drawing images, we need the brush to be as small as possible.
         easel.change_brush_size(0);
+        easel.change_tool(Tool::Paintbrush);
 
         if (size_x > size_y && easel.orientation == Orientation::Portrait)
             || (size_y > size_x && easel.orientation == Orientation::Landscape)

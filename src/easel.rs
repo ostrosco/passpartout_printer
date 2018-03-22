@@ -165,9 +165,6 @@ impl Easel {
 
     /// Changes the current tool.
     pub fn change_tool(&mut self, tool: Tool) {
-        if tool == self.current_tool {
-            return;
-        }
         let coords = match tool {
             Tool::Paintbrush => self.easel_coords.paintbrush,
             Tool::Pen => self.easel_coords.pen,
