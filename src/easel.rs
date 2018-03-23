@@ -6,6 +6,7 @@ extern crate serde_json;
 
 use std::io::{Read, Write};
 use std::fs::File;
+use std::i32;
 use std::f32;
 use std::time::Duration;
 use std::thread;
@@ -356,7 +357,7 @@ impl Easel {
                 }
             })
             .collect();
-        let start_y = points.iter().fold(10_000, |acc, pnt| acc.min(pnt.y));
+        let start_y = points.iter().fold(i32::MAX, |acc, pnt| acc.min(pnt.y));
         let end_y = points.iter().fold(0, |acc, pnt| acc.max(pnt.y));
         let mut iy = start_y;
         let old_brush_size = self.brush_size;

@@ -18,20 +18,16 @@ pub struct ImageDrawer<'a> {
     current_color: PaletteColor,
 
     // The size of the easel along x.
-    easel_x: i32,
-    easel_y: i32,
+    easel_size: Coord,
 
     // The starting point to use for the next draw operation.
-    start_x: i32,
-    start_y: i32,
+    current_pos: Coord,
 
     // The size of the image.
-    size_x: i32,
-    size_y: i32,
+    image_size: Coord,
 
     // The offset of the image to center it on the easel.
-    offset_x: i32,
-    offset_y: i32,
+    offset: Coord,
 }
 
 pub fn size_to_easel(image: &DynamicImage, easel: &Easel) -> DynamicImage {
@@ -67,29 +63,29 @@ impl<'a> ImageDrawer<'a> {
         let (ulcorner, lrcorner) = easel.get_bounds();
         let easel_x = lrcorner.x - ulcorner.x - 1;
         let easel_y = lrcorner.y - ulcorner.y - 1;
+        let easel_size = Coord::new(easel_x, easel_y);
 
         let size_x = size_x as i32;
         let size_y = size_y as i32;
+        let image_size = Coord::new(size_x, size_y);
         //
         // Offsets used to center the image as best as possible on the easel.
         let offset_x = (easel_x - size_x + 1) / 2;
         let offset_y = (easel_y - size_y) / 2;
+        let offset = Coord::new(offset_x, offset_y);
 
         let start_x = offset_x;
         let start_y = offset_y;
+        let current_pos = Coord::new(start_x, start_y);
 
         ImageDrawer {
             easel: easel,
             palette: Palette::new(),
             current_color: current_color,
-            easel_x: easel_x,
-            easel_y: easel_y,
-            start_x: start_x,
-            start_y: start_y,
-            size_x: size_x,
-            size_y: size_y,
-            offset_x: offset_x,
-            offset_y: offset_y,
+            easel_size: easel_size,
+            image_size: image_size,
+            current_pos: current_pos,
+            offset: offset,
         }
     }
 
@@ -98,10 +94,10 @@ impl<'a> ImageDrawer<'a> {
     /// If the image completely fills the y axis of the easel, this method
     /// does no drawing.
     pub fn draw_top_border(&mut self) -> Result<(), Error> {
-        for iy in 0..self.offset_y {
+        for iy in 0..self.offset.y {
             self.easel.draw_line(
                 Coord::new(0, iy),
-                Coord::new(self.easel_x, iy),
+                Coord::new(self.easel_size.x, iy),
                 &PaletteColor::White,
             )?;
         }
@@ -128,32 +124,30 @@ impl<'a> ImageDrawer<'a> {
         x: u32,
         y: u32,
     ) -> Result<(), Error> {
-        let x = x as i32 + self.offset_x;
-        let y = y as i32 + self.offset_y;
+        let mut in_coord = Coord::new(x as i32, y as i32);
+        in_coord = in_coord + &self.offset;
         let closest_color = self.palette.colormap[self.palette.index_of(rgba)];
 
         // If we've hit the end of a row, draw the rest of the row before
         // moving on to the next row.
-        if y > self.start_y {
+        if in_coord.y > self.current_pos.y {
             self.easel.draw_line(
-                Coord::new(self.start_x, self.start_y),
-                Coord::new(self.size_x + self.offset_x, self.start_y),
+                self.current_pos,
+                Coord::new(self.image_size.x + self.offset.x, self.current_pos.y),
                 &self.current_color,
             )?;
-            self.start_x = x;
-            self.start_y = y;
+            self.current_pos = in_coord;
             self.current_color = closest_color;
         }
 
         // If there's a color change, draw the line up to this pixel and stop.
         if closest_color != self.current_color {
             self.easel.draw_line(
-                Coord::new(self.start_x, self.start_y),
-                Coord::new(x - 1, y),
+                self.current_pos,
+                in_coord - &Coord::new(1, 0),
                 &self.current_color,
             )?;
-            self.start_x = x;
-            self.start_y = y;
+            self.current_pos = in_coord;
             self.current_color = closest_color;
         }
 
@@ -163,14 +157,14 @@ impl<'a> ImageDrawer<'a> {
     /// Draw the bottom white border and clean up the horizontal edges.
     pub fn cleanup_image(&mut self) -> Result<(), Error> {
         // Clean up the left-most edge of the picture if one exists.
-        let left_edge = self.offset_x - 1;
+        let left_edge = self.offset.x - 1;
         if left_edge > 0 {
             self.easel.draw_line(
                 Coord::new(left_edge, 0),
-                Coord::new(left_edge, self.size_y),
+                Coord::new(left_edge, self.image_size.y),
                 &PaletteColor::White,
             )?;
-            for ix in self.offset_y..self.size_y + self.offset_y {
+            for ix in self.offset.y..self.image_size.y + self.offset.y {
                 self.easel.draw_line(
                     Coord::new(0, ix),
                     Coord::new(left_edge, ix),
@@ -180,17 +174,17 @@ impl<'a> ImageDrawer<'a> {
         }
 
         // Clean up the right-most edge of the picture if one exists.
-        let right_edge = self.size_x + self.offset_x + 1;
-        if right_edge < self.easel_x {
+        let right_edge = self.image_size.x + self.offset.x + 1;
+        if right_edge < self.easel_size.x {
             self.easel.draw_line(
                 Coord::new(right_edge, 0),
-                Coord::new(right_edge, self.size_y),
+                Coord::new(right_edge, self.image_size.y),
                 &PaletteColor::White,
             )?;
-            for ix in self.offset_y..self.size_y + self.offset_y {
+            for ix in self.offset.y..self.image_size.y + self.offset.y {
                 self.easel.draw_line(
                     Coord::new(right_edge, ix),
-                    Coord::new(self.easel_x, ix),
+                    Coord::new(self.easel_size.x, ix),
                     &PaletteColor::White,
                 )?;
             }
@@ -198,11 +192,11 @@ impl<'a> ImageDrawer<'a> {
 
         // Once we've hit the end of the picture, tidy up the bottom by drawing
         // white lines to fill in the entire canvas.
-        if self.start_y < self.easel_y {
-            for iy in self.start_y..self.easel_y {
+        if self.current_pos.y < self.easel_size.y {
+            for iy in self.current_pos.y..self.easel_size.y {
                 self.easel.draw_line(
                     Coord::new(0, iy),
-                    Coord::new(self.easel_x, iy),
+                    Coord::new(self.easel_size.x, iy),
                     &PaletteColor::White,
                 )?;
             }

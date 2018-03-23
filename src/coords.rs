@@ -59,6 +59,16 @@ impl<'a, 'b> Sub<&'a Coord> for &'b Coord {
     }
 }
 
+impl<'a> Sub<&'a Coord> for Coord {
+    type Output = Coord;
+    fn sub(self, rhs: &'a Coord) -> Self::Output {
+        Coord {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
 impl<'a> Mul<i32> for &'a Coord {
     type Output = Coord;
     fn mul(self, rhs: i32) -> Self::Output {
