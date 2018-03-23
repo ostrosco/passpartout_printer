@@ -3,8 +3,7 @@ extern crate image;
 use image::Rgba;
 use image::imageops::colorops::ColorMap;
 use std::f32;
-
-pub type Point = (i32, i32);
+use coords::Coord;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum PaletteColor {
@@ -40,8 +39,8 @@ pub struct Palette {
 }
 
 impl PaletteColor {
-    pub fn get_row_col(&self) -> Point {
-        match *self {
+    pub fn get_row_col(&self) -> Coord {
+        Coord::from(match *self {
             PaletteColor::Black => (0, 0),
             PaletteColor::Grey => (0, 1),
             PaletteColor::White => (0, 2),
@@ -66,7 +65,7 @@ impl PaletteColor {
             PaletteColor::DarkViolet => (7, 0),
             PaletteColor::Violet => (7, 1),
             PaletteColor::LightViolet => (7, 2),
-        }
+        })
     }
 
     pub fn get_rgba(&self) -> Rgba<u8> {

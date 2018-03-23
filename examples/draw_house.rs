@@ -7,20 +7,22 @@ use enigo::Enigo;
 use passpartout_printer::easel::Easel;
 use passpartout_printer::colors::PaletteColor;
 use failure::Error;
+use passpartout_printer::coords::Coord;
 
 fn app() -> Result<(), Error> {
     let enigo = Enigo::new();
     let mut easel = Easel::new(
-        "../coords.json".to_string(),
+        "coords.json".to_string(),
         enigo,
-        Duration::from_millis(6),
+        Duration::from_millis(32),
     )?;
     easel.change_brush_size(0);
-    let points = [(100, 100), (100, 150), (150, 150), (150, 100)];
+    let points =
+        Coord::from_slice(&[(100, 100), (100, 150), (150, 150), (150, 100)]);
     easel.draw_shape(&points, &PaletteColor::Red, true, true)?;
-    let points = [(125, 50), (100, 100), (150, 100)];
+    let points = Coord::from_slice(&[(125, 50), (100, 100), (150, 100)]);
     easel.draw_shape(&points, &PaletteColor::Blue, true, true)?;
-    let points = [
+    let points = Coord::from_slice(&[
         (200, 200),
         (150, 250),
         (100, 250),
@@ -31,7 +33,7 @@ fn app() -> Result<(), Error> {
         (225, 300),
         (300, 250),
         (250, 250),
-    ];
+    ]);
     easel.draw_shape(&points, &PaletteColor::Yellow, true, true)?;
     Ok(())
 }

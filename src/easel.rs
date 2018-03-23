@@ -6,26 +6,26 @@ extern crate serde_json;
 
 use std::io::{Read, Write};
 use std::fs::File;
+use std::i32;
 use std::f32;
 use std::time::Duration;
 use std::thread;
 use self::failure::Error;
 use self::enigo::{Enigo, MouseButton, MouseControllable};
-use colors::{Palette, PaletteColor, Point};
-use image::imageops::ColorMap;
-use image::Rgba;
+use colors::PaletteColor;
+use coords::Coord;
 
 #[derive(Serialize, Deserialize)]
 pub struct EaselCoords {
-    pub portrait_bounds: (Point, Point),
-    pub landscape_bounds: (Point, Point),
-    pub paintbrush: Point,
-    pub spray_can: Point,
-    pub pen: Point,
-    pub decrease_brush: Point,
-    pub increase_brush: Point,
-    pub change_orientation: Point,
-    pub color_start: Point,
+    pub portrait_bounds: (Coord, Coord),
+    pub landscape_bounds: (Coord, Coord),
+    pub paintbrush: Coord,
+    pub spray_can: Coord,
+    pub pen: Coord,
+    pub decrease_brush: Coord,
+    pub increase_brush: Coord,
+    pub change_orientation: Coord,
+    pub color_start: Coord,
     pub color_row_step: i32,
     pub color_col_step: i32,
 }
@@ -75,7 +75,7 @@ const STARTING_TOOL: Tool = Tool::Paintbrush;
 #[derive(Fail, Debug)]
 pub enum EaselError {
     #[fail(display = "Out of bounds error drawing to the easel")] OutOfBounds,
-    #[fail(display = "Drawing requires at least one point.")] NoPoints,
+    #[fail(display = "Drawing requires at least one point.")] NoCoord,
 }
 
 pub struct Easel {
@@ -148,8 +148,8 @@ impl Easel {
         thread::sleep(mouse_wait);
     }
 
-    fn move_and_click(&mut self, x: i32, y: i32) {
-        self.mouse.mouse_move_to(x, y);
+    fn move_and_click(&mut self, coord: &Coord) {
+        self.mouse.mouse_move_to(coord.x, coord.y);
         thread::sleep(self.mouse_wait);
         self.click(None);
     }
@@ -157,7 +157,7 @@ impl Easel {
     /// Toggles the orientation of the easel.
     pub fn change_orientation(&mut self) {
         let orient_coords = self.easel_coords.change_orientation;
-        self.move_and_click(orient_coords.0, orient_coords.1);
+        self.move_and_click(&orient_coords);
         self.orientation = match self.orientation {
             Orientation::Portrait => Orientation::Landscape,
             Orientation::Landscape => Orientation::Portrait,
@@ -166,20 +166,17 @@ impl Easel {
 
     /// Changes the current tool.
     pub fn change_tool(&mut self, tool: Tool) {
-        if tool == self.current_tool {
-            return;
-        }
         let coords = match tool {
             Tool::Paintbrush => self.easel_coords.paintbrush,
             Tool::Pen => self.easel_coords.pen,
             Tool::Spraycan => self.easel_coords.spray_can,
         };
-        self.move_and_click(coords.0, coords.1);
+        self.move_and_click(&coords);
         self.current_tool = tool;
     }
 
     /// Returns the current bounds of the easel in screen coordinates.
-    pub fn get_bounds(&self) -> (Point, Point) {
+    pub fn get_bounds(&self) -> (Coord, Coord) {
         match self.orientation {
             Orientation::Portrait => self.easel_coords.portrait_bounds,
             Orientation::Landscape => self.easel_coords.landscape_bounds,
@@ -190,14 +187,14 @@ impl Easel {
     /// if the current color is the same as the desired color.
     pub fn change_color(&mut self, color: &PaletteColor) {
         if *color != self.current_color {
-            let (row, col) = color.get_row_col();
+            let color_pos = color.get_row_col();
             let row_step = self.easel_coords.color_row_step;
             let col_step = self.easel_coords.color_col_step;
-            let (x, y) = (
-                self.easel_coords.color_start.0 + (row * row_step),
-                self.easel_coords.color_start.1 + (col * col_step),
+            let color_coords = Coord::new(
+                self.easel_coords.color_start.x + (color_pos.x * row_step),
+                self.easel_coords.color_start.y + (color_pos.y * col_step),
             );
-            self.move_and_click(x, y);
+            self.move_and_click(&color_coords);
             self.current_color = *color;
         }
     }
@@ -235,58 +232,12 @@ impl Easel {
             self.easel_coords.decrease_brush
         };
         let num_clicks = (brush_size - self.brush_size).abs();
-        self.move_and_click(brush_coords.0, brush_coords.1);
+        self.move_and_click(&brush_coords);
         for _ in 1..num_clicks {
             self.click(Some(mouse_wait));
             thread::sleep(mouse_wait);
         }
         self.brush_size = brush_size;
-    }
-
-    /// Draws a single pixel as the specified coordinates.
-    ///
-    /// # Arguments
-    ///
-    /// * `coords`: The coordinates of the pixel from the input image.
-    /// * `color`: The RBGA color to draw to the pixel.
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// use easel::*;
-    /// use enigo::*;
-    /// use std::time::Duration;
-    /// use image::Rgba;
-    ///
-    /// // Draw a black pixel in the upper-left corner of the easel.
-    /// let mut easel = Easel::new("coords.json", Enigo::new(),
-    ///     Duration::from_millis(6));
-    /// let color = Rgba { data = [0, 0, 0, 255] };
-    /// let coords = (0, 0);
-    /// easel.draw_pixel(coords, &color);
-    /// ```
-    pub fn draw_pixel(
-        &mut self,
-        coords: Point,
-        color: &Rgba<u8>,
-    ) -> Result<(), Error> {
-        let palette = Palette::new();
-        let closest_color = palette.colormap[palette.index_of(color)];
-
-        // Translate the coordinates of the picture to coordinates of the easel.
-        let (start, end) = self.get_bounds();
-        let brush_size = self.brush_size + 12;
-        let coords = (
-            start.0 + coords.0 + brush_size,
-            start.1 + coords.1 + brush_size,
-        );
-        if coords.0 > end.0 || coords.1 > end.1 {
-            Err(EaselError::OutOfBounds)?
-        }
-
-        self.change_color(&closest_color);
-        self.move_and_click(coords.0, coords.1);
-        Ok(())
     }
 
     /// Draws a line on the easel of the particular color.
@@ -316,8 +267,8 @@ impl Easel {
     /// ```
     pub fn draw_line(
         &mut self,
-        start_line: Point,
-        end_line: Point,
+        start_line: Coord,
+        end_line: Coord,
         color: &PaletteColor,
     ) -> Result<(), Error> {
         // Translate the coordinates of the picture to coordinates of the easel.
@@ -336,7 +287,7 @@ impl Easel {
     ///
     pub fn draw_shape(
         &mut self,
-        points: &[Point],
+        points: &[Coord],
         color: &PaletteColor,
         close_shape: bool,
         fill: bool,
@@ -346,29 +297,30 @@ impl Easel {
 
         let start_point = match points.get(0) {
             Some(p) => p,
-            None => Err(EaselError::NoPoints)?,
+            None => Err(EaselError::NoCoord)?,
         };
 
-        let start_point =
-            ((start.0 + start_point.0), (start.1 + start_point.1));
-        if start_point.0 > end.0 || start_point.1 > end.1 {
+        let start_point = start + start_point;
+        if start_point.x > end.x || start_point.y > end.y {
+            println!("point: {:?}, end: {:?}", start_point, end);
             Err(EaselError::OutOfBounds)?
         }
 
-        self.mouse.mouse_move_to(start_point.0, start_point.1);
+        self.mouse.mouse_move_to(start_point.x, start_point.y);
         thread::sleep(self.mouse_wait);
         self.mouse.mouse_down(MouseButton::Left);
         for point in points.iter() {
-            let point = ((start.0 + point.0), (start.1 + point.1));
-            if point.0 > end.0 || point.1 > end.1 {
+            let point = start + point;
+            if point.x > end.x || point.y > end.y {
+                println!("point: {:?}, end: {:?}", point, end);
                 Err(EaselError::OutOfBounds)?
             }
-            self.mouse.mouse_move_to(point.0, point.1);
+            self.mouse.mouse_move_to(point.x, point.y);
             thread::sleep(self.mouse_wait);
         }
 
         if close_shape || fill {
-            self.mouse.mouse_move_to(start_point.0, start_point.1);
+            self.mouse.mouse_move_to(start_point.x, start_point.y);
             thread::sleep(self.mouse_wait);
         }
 
@@ -383,30 +335,30 @@ impl Easel {
     }
 
     /// Use the scanline polygon fill algorithm to fill in the polygon.
-    /// 
+    ///
     /// * `points` List of coordinates that define the polygon to fill.
     /// * `color` The color to fill the polygon with.
     ///
     fn fill(
         &mut self,
-        points: &[Point],
+        points: &[Coord],
         color: &PaletteColor,
     ) -> Result<(), Error> {
-        let mut edges: Vec<[Point; 2]> =
-            points.windows(2).map(|pts| [pts[0], pts[1]]).collect();
-        edges.push([*points.first().unwrap(), *points.last().unwrap()]);
+        let mut edges: Vec<[&Coord; 2]> =
+            points.windows(2).map(|pts| [&pts[0], &pts[1]]).collect();
+        edges.push([points.first().unwrap(), points.last().unwrap()]);
         let slope: Vec<f32> = edges
             .iter()
             .map(|pts| {
-                if pts[1].0 == pts[0].0 {
+                if pts[1].x == pts[0].x {
                     0.0
                 } else {
-                    (pts[1].1 - pts[0].1) as f32 / (pts[1].0 - pts[0].0) as f32
+                    (pts[1].y - pts[0].y) as f32 / (pts[1].x - pts[0].x) as f32
                 }
             })
             .collect();
-        let start_y = points.iter().fold(10_000, |acc, pnt| acc.min(pnt.1));
-        let end_y = points.iter().fold(0, |acc, pnt| acc.max(pnt.1));
+        let start_y = points.iter().fold(i32::MAX, |acc, pnt| acc.min(pnt.y));
+        let end_y = points.iter().fold(0, |acc, pnt| acc.max(pnt.y));
         let mut iy = start_y;
         let old_brush_size = self.brush_size;
         self.change_brush_size(0);
@@ -414,8 +366,8 @@ impl Easel {
         while iy < end_y {
             let mut active_edges = vec![];
             for (edge, slope) in edges.iter().zip(slope.iter()) {
-                let max = edge[0].1.max(edge[1].1);
-                let min = edge[0].1.min(edge[1].1);
+                let max = edge[0].y.max(edge[1].y);
+                let min = edge[0].y.min(edge[1].y);
                 if max > iy && min < iy && max != min {
                     active_edges.push((edge, slope));
                 }
@@ -424,9 +376,9 @@ impl Easel {
                 .iter()
                 .map(|&(pts, m)| {
                     if *m == 0.0 {
-                        pts[0].0
+                        pts[0].x
                     } else {
-                        (pts[0].0 as f32 + 1.0 / m * (iy - pts[0].1) as f32)
+                        (pts[0].x as f32 + 1.0 / m * (iy - pts[0].y) as f32)
                             as i32
                     }
                 })
@@ -434,7 +386,11 @@ impl Easel {
             let mut in_poly = true;
             for x in x_draw.windows(2) {
                 if x[0] != x[1] && in_poly {
-                    self.draw_line((x[0], iy), (x[1], iy), color)?;
+                    self.draw_line(
+                        Coord::new(x[0], iy),
+                        Coord::new(x[1], iy),
+                        color,
+                    )?;
                 }
                 in_poly = !in_poly;
             }
