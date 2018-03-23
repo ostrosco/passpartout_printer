@@ -1,7 +1,5 @@
 
 /target/
 **/*.rs.bk
-**/*.jpg
-**/*.gif
-**/*.png
+/images/
 coords.json
