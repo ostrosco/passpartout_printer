@@ -63,8 +63,8 @@ pub enum Tool {
 /// The number of brush steps we can take when resizing.
 const NUM_BRUSH_STEPS: i32 = 16;
 
-/// From a fresh boot of the game, the brush size starts at step 9.
-const STARTING_BRUSH: i32 = 9;
+/// From a fresh boot of the game, the brush size starts at step 10.
+const STARTING_BRUSH: i32 = 10;
 
 /// From a fresh boot of the game, the brush color starts as black.
 const STARTING_COLOR: PaletteColor = PaletteColor::Black;
