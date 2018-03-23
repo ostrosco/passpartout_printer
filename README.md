@@ -8,11 +8,7 @@ This application has one of two main operating modes:
 
 * Image Drawing Mode: takes an input image and draws it to the easel in-game.
 
-- TODO: insert a gif of a picture being drawn here
-
 * Shape Drawing Mode: takes a list of coordinates and draws that shape in-game.
-
-- TODO: insert a gif of several shapes being drawn here
 
 # Downloading and Compiling
 
