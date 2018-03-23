@@ -1,6 +1,9 @@
 # Passpartout Printer
 
 Draws images into the game [Passpartout: The Starving Artist](http://store.steampowered.com/app/582550/Passpartout_The_Starving_Artist/).
+
+![Drawing our favorite crab. Original draw time 7 minutes.](https://thumbs.gfycat.com/SevereViciousBittern-size_restricted.gif)
+
 This application has one of two main operating modes:
 
 * Image Drawing Mode: takes an input image and draws it to the easel in-game.
