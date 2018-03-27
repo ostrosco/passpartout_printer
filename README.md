@@ -71,17 +71,19 @@ enabled. Initial observations have shown that the FPS can drop between 5% to
 15% when drawing, so it's best to go a little slower than the max FPS.
 Wait times of 5ms or less seem to cause severe input errors regardless of FPS.
 
-- TODO: include a screenshot of how to turn on the FPS counter.
+![Window to enable the FPS counter](screenshots/fps_counter.png)
 
 # Dithering
 
 [Dithering](https://en.wikipedia.org/wiki/Dither) can greatly improve the image
-quality at a significant performance tradeoff. Below are two draws of the same
-image: one without dithering and one with dithering. Expect dithering to
-increase the draw time of an image by 2 to 4 times.
+quality at a significant performance tradeoff by reducing color banding. Expect
+dithering to increase the draw time by 2 to 4 times depending on the complexity
+of the input image.
 
-- TODO: draw the Mona Lisa with and without dithering. Note the draw times
-given a particular wait time.
+Without Dithering                              | With Dithering
+:---------------------------------------------:|:------------------------------------------:
+![](screenshots/mona_lisa_no_dither_easel.jpg) | ![](screenshots/mona_lisa_dither_easel.jpg)
+Draw Time: 1 hour at 7ms wait time             | Draw Time: 3.5 hours at 7ms wait time
 
 # Examples
 
@@ -91,3 +93,17 @@ the application. To run them:
 ```
 cargo run --release --example draw_house
 ```
+
+# Screenshots
+
+Graffiti - Artist Unknown:
+
+![](screenshots/graffiti_easel.jpg)
+
+Lotus Pond - [Jessica T. Hamliton](https://www.reddit.com/user/JessicaTHamilton):
+
+![](screenshots/lotus_pond_jessica_hamilton.jpg)
+
+In-game screenshot of Mona Lisa:
+
+![](screenshots/mona_lisa_dither.png)
