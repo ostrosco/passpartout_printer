@@ -46,7 +46,9 @@ fn app() -> Result<(), Error> {
         let mut prev = false;
         loop {
             let key_pressed = device_state.get_keys();
-            if key_pressed.contains(&Keycode::Space) {
+            if key_pressed.contains(&Keycode::Space)
+                && key_pressed.contains(&Keycode::LControl)
+            {
                 prev = true;
             } else if prev {
                 prev = false;
@@ -69,11 +71,14 @@ fn app() -> Result<(), Error> {
         0 => true,
         _ => false,
     };
+
     println!("Printing to Passpartout with the following settings:");
     println!("-- image: {}", image_path);
     println!("-- mouse wait: {}", mouse_wait);
     println!("-- dithering: {}", enable_dither);
     println!("-- image scaling: {}", enable_scale);
+    println!();
+    println!("Press Left Control + Space to pause drawing.");
     println!();
 
     let wait_time = Duration::from_millis(mouse_wait);

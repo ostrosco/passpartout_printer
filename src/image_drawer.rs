@@ -133,7 +133,10 @@ impl<'a> ImageDrawer<'a> {
         if in_coord.y > self.current_pos.y {
             self.easel.draw_line(
                 self.current_pos,
-                Coord::new(self.image_size.x + self.offset.x, self.current_pos.y),
+                Coord::new(
+                    self.image_size.x + self.offset.x,
+                    self.current_pos.y,
+                ),
                 &self.current_color,
             )?;
             self.current_pos = in_coord;

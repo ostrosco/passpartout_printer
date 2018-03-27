@@ -61,6 +61,8 @@ OPTIONS:
     -w, --mouse-wait <WAIT>    Specify the time to wait between mouse actions
 ```
 
+Pressing Left Control + Space will pause or resume printing.
+
 # Deciding on a Wait Time
 
 The speed in which passpartout_printer can draw to the easel is limited by the
