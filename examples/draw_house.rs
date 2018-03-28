@@ -14,7 +14,7 @@ fn app() -> Result<(), Error> {
     let mut easel = Easel::new(
         "coords.json".to_string(),
         enigo,
-        Duration::from_millis(6),
+        Duration::from_millis(10),
     )?;
 
     // First, draw the background sky.
@@ -50,6 +50,15 @@ fn app() -> Result<(), Error> {
         Coord::new(house_ur.x - house_ul.x, house_ur.y - 150),
     ];
     easel.draw_shape(points, &PaletteColor::LightBrown, true, true)?;
+
+    // Lastly, draw a star to show off the scanline fill algorithm.
+    let points = Coord::from_slice(&[
+        (100, 75),
+        (50, 200),
+        (175, 125),
+        (25, 125),
+        (150, 200)]);
+    easel.draw_shape(&points, &PaletteColor::Yellow, true, true)?;
 
     Ok(())
 }
