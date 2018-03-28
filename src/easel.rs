@@ -63,9 +63,6 @@ pub enum Tool {
 /// The number of brush steps we can take when resizing.
 const NUM_BRUSH_STEPS: i32 = 16;
 
-/// From a fresh boot of the game, the brush size starts at step 10.
-const STARTING_BRUSH: i32 = 10;
-
 /// From a fresh boot of the game, the brush color starts as black.
 const STARTING_COLOR: PaletteColor = PaletteColor::Black;
 
@@ -126,15 +123,32 @@ impl Easel {
     ) -> Result<Easel, Error> {
         let easel_coords = EaselCoords::new(path)?;
         let orientation = Orientation::Portrait;
-        Ok(Easel {
+
+        let mut easel = Easel {
             mouse: mouse,
             mouse_wait: mouse_wait,
             easel_coords: easel_coords,
             orientation: orientation,
-            brush_size: STARTING_BRUSH,
+            brush_size: 0,
             current_color: STARTING_COLOR,
             current_tool: STARTING_TOOL,
-        })
+        };
+
+        // Since this application could be run multiple times in succession,
+        // this initial state isn't always true. However, we can guarantee
+        // that it is for the current color, current tool, and brush size.
+        // We can't unfortunately do anything clever to guarantee the
+        // easel orientation, so that'll have to be on the user to make sure
+        // they switch back to portrait between runs.
+        println!("Resetting easel to known configuration.");
+        println!("Assuming a default orientation of portrait.");
+        easel.change_brush_size(16);
+        easel.change_brush_size(0);
+        easel.change_tool(STARTING_TOOL);
+        easel.change_color(&STARTING_COLOR);
+        println!("Easel configuration complete.");
+
+        Ok(easel)
     }
 
     fn click(&mut self, wait_time: Option<Duration>) {

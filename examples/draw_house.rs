@@ -14,27 +14,43 @@ fn app() -> Result<(), Error> {
     let mut easel = Easel::new(
         "coords.json".to_string(),
         enigo,
-        Duration::from_millis(32),
+        Duration::from_millis(6),
     )?;
+
+    // First, draw the background sky.
+    easel.change_brush_size(16);
+    let (easel_ul, easel_lr) = easel.get_bounds();
+    let easel_size = &easel_lr - &easel_ul;
+    let points = &[
+        Coord::new(0, 0),
+        Coord::new(0, easel_size.y),
+        easel_size,
+        Coord::new(easel_size.x, 0),
+        Coord::new(easel_size.x / 2, 0),
+        Coord::new(easel_size.x / 2, easel_size.y),
+    ];
+    easel.draw_shape(points, &PaletteColor::LightBlue, true, false)?;
+
+    // Next, draw us a nice house.
     easel.change_brush_size(0);
-    let points =
-        Coord::from_slice(&[(100, 100), (100, 150), (150, 150), (150, 100)]);
-    easel.draw_shape(&points, &PaletteColor::Red, true, true)?;
-    let points = Coord::from_slice(&[(125, 50), (100, 100), (150, 100)]);
-    easel.draw_shape(&points, &PaletteColor::Blue, true, true)?;
-    let points = Coord::from_slice(&[
-        (200, 200),
-        (150, 250),
-        (100, 250),
-        (150, 300),
-        (125, 350),
-        (200, 300),
-        (250, 350),
-        (225, 300),
-        (300, 250),
-        (250, 250),
-    ]);
-    easel.draw_shape(&points, &PaletteColor::Yellow, true, true)?;
+    let house_ul = Coord::new(easel_size.x / 4, easel_size.y * 3 / 4);
+    let house_ur = Coord::new(easel_size.x * 3 / 4, easel_size.y * 3 / 4);
+    let points = &[
+        house_ul,
+        house_ur,
+        Coord::new(easel_size.x * 3 / 4, easel_size.y),
+        Coord::new(easel_size.x / 4, easel_size.y),
+    ];
+    easel.draw_shape(points, &PaletteColor::DarkRed, true, true)?;
+
+    // Now draw us a roof.
+    let points = &[
+        house_ul,
+        house_ur,
+        Coord::new(house_ur.x - house_ul.x, house_ur.y - 150),
+    ];
+    easel.draw_shape(points, &PaletteColor::LightBrown, true, true)?;
+
     Ok(())
 }
 
