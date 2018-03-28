@@ -102,7 +102,7 @@ Graffiti - Artist Unknown:
 
 ![](screenshots/graffiti_easel.jpg)
 
-Lotus Pond - [Jessica T. Hamliton](https://www.reddit.com/user/JessicaTHamilton):
+Lotus Pond - [Jessica T. Hamilton](https://www.reddit.com/user/JessicaTHamilton):
 
 ![](screenshots/lotus_pond_jessica_hamilton.jpg)
 
