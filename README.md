@@ -96,16 +96,15 @@ the application. To run them:
 cargo run --release --example draw_house
 ```
 
-# Screenshots
+# In-Game Screenshots
 
-Graffiti - Artist Unknown:
+Graffiti - Artist Unknown. Dithering disabled. 1 hour draw time at 6ms wait.
 
-![](screenshots/graffiti_easel.jpg)
+![](screenshots/graffiti.png)
 
-Lotus Pond - [Jessica T. Hamilton](https://www.reddit.com/user/JessicaTHamilton):
+Lotus Pond - [Jessica T. Hamilton](https://www.reddit.com/user/JessicaTHamilton). Dithering enabled. 2 hour 45 minute draw time at 6ms wait.
 
-![](screenshots/lotus_pond_jessica_hamilton.jpg)
+![](screenshots/lotus_pond_jessica_hamilton.png)
 
-In-game screenshot of Mona Lisa:
-
+Mona Lisa - Leonardo da Vinci. Dithering enabled. 3 hour 30 minute draw time at 7ms wait.
 ![](screenshots/mona_lisa_dither.png)
