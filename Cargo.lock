@@ -164,7 +164,7 @@ dependencies = [
 [[package]]
 name = "device_query"
 version = "0.1.0"
-source = "git+https://github.com/ostrosco/device_query#e9c1d1987a6e2490afa6a43615c2552fbfcfa8fd"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "pkg-config 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "user32-sys 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -359,7 +359,7 @@ name = "passpartout_printer"
 version = "0.1.0"
 dependencies = [
  "clap 2.31.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "device_query 0.1.0 (git+https://github.com/ostrosco/device_query)",
+ "device_query 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "enigo 0.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure_derive 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -649,7 +649,7 @@ dependencies = [
 "checksum crossbeam-epoch 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "927121f5407de9956180ff5e936fe3cf4324279280001cd56b669d28ee7e9150"
 "checksum crossbeam-utils 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "2760899e32a1d58d5abb31129f8fae5de75220bc2176e77ff7c627ae45c918d9"
 "checksum deflate 0.7.18 (registry+https://github.com/rust-lang/crates.io-index)" = "32c8120d981901a9970a3a1c97cf8b630e0fa8c3ca31e75b6fd6fd5f9f427b31"
-"checksum device_query 0.1.0 (git+https://github.com/ostrosco/device_query)" = "<none>"
+"checksum device_query 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "400a346174feac43a557d8f8715df3d26160fae28b3c5f96f737f80313192e1f"
 "checksum dtoa 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "09c3753c3db574d215cba4ea76018483895d7bff25a31b49ba45db21c48e50ab"
 "checksum either 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "3be565ca5c557d7f59e7cfcf1844f9e3033650c929c6566f511e8005f205c1d0"
 "checksum enigo 0.0.11 (registry+https://github.com/rust-lang/crates.io-index)" = "9f7ebb63f079486edb191564e3b504556d09fef00e979964c05e5960e8684b2d"

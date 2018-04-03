@@ -12,4 +12,4 @@ failure = "0.1"
 failure_derive = "0.1"
 image = "0.18"
 clap = "2.30.0"
-device_query = {git="https://github.com/ostrosco/device_query"}
+device_query = "0.1.0"
