@@ -2,6 +2,12 @@
 name = "passpartout_printer"
 version = "1.0.0"
 authors = ["ostrosco <ostrosco@fastmail.fm>"]
+description = "Utility for drawing images into the game Passpartout: The Starving Artist."
+homepage = "https://github.com/ostrosco/passpartout_printer"
+repository = "https://github.com/ostrosco/passpartout_printer"
+readme = "README.md"
+keywords = ["art", "draw", "passpartout", "image"]
+license = "MIT"
 
 [dependencies]
 enigo = "0.0.11"
