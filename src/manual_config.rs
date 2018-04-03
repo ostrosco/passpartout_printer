@@ -5,7 +5,7 @@ use easel::EaselCoords;
 use std::thread;
 use std::time::Duration;
 use failure::Error;
-use self::device_query::DeviceQuery;
+use self::device_query::{DeviceQuery, DeviceState};
 use coords::Coord;
 
 pub fn create_config(path: &str) -> Result<(), Error> {
@@ -80,11 +80,11 @@ pub fn create_config(path: &str) -> Result<(), Error> {
 
 pub fn get_pos() -> Coord {
     let mut mouse_pos = (0, 0);
-    let device_query = device_query::DeviceState::new();
+    let device_query = DeviceState::new();
 
     let mut running = true;
     while running {
-        let mouse_state = device_query.get_coords();
+        let mouse_state = device_query.get_mouse();
         if mouse_state.button_pressed.get(1) == Some(&true) {
             mouse_pos = mouse_state.coords;
             running = false;

@@ -71,8 +71,10 @@ const STARTING_TOOL: Tool = Tool::Paintbrush;
 
 #[derive(Fail, Debug)]
 pub enum EaselError {
-    #[fail(display = "Out of bounds error drawing to the easel")] OutOfBounds,
-    #[fail(display = "Drawing requires at least one point.")] NoCoord,
+    #[fail(display = "Out of bounds error drawing to the easel")]
+    OutOfBounds,
+    #[fail(display = "Drawing requires at least one point.")]
+    NoCoord,
 }
 
 pub struct Easel {

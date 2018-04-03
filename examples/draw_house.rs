@@ -57,7 +57,8 @@ fn app() -> Result<(), Error> {
         (50, 200),
         (175, 125),
         (25, 125),
-        (150, 200)]);
+        (150, 200),
+    ]);
     easel.draw_shape(&points, &PaletteColor::Yellow, true, true)?;
 
     Ok(())
