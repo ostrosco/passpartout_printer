@@ -1,16 +1,12 @@
-extern crate enigo;
-extern crate failure;
-extern crate image;
-
-use easel::{Easel, Orientation, Tool};
-use colors::{Palette, PaletteColor};
-use coords::Coord;
-use self::image::DynamicImage;
-use self::image::FilterType;
-use self::image::GenericImage;
-use self::image::Rgba;
-use self::failure::Error;
+use crate::colors::{Palette, PaletteColor};
+use crate::coords::Coord;
+use crate::easel::{Easel, Orientation, Tool};
 use image::imageops::ColorMap;
+use image::imageops::FilterType;
+use image::DynamicImage;
+use image::GenericImageView;
+use image::Rgba;
+use std::error::Error;
 
 pub struct ImageDrawer<'a> {
     easel: &'a mut Easel,
@@ -43,11 +39,7 @@ pub fn size_to_easel(image: &DynamicImage, easel: &Easel) -> DynamicImage {
 }
 
 impl<'a> ImageDrawer<'a> {
-    pub fn new(
-        easel: &'a mut Easel,
-        size_x: u32,
-        size_y: u32,
-    ) -> ImageDrawer<'a> {
+    pub fn new(easel: &'a mut Easel, size_x: u32, size_y: u32) -> ImageDrawer<'a> {
         // For drawing images, we need the brush to be as small as possible.
         easel.change_brush_size(0);
         easel.change_tool(Tool::Paintbrush);
@@ -79,13 +71,13 @@ impl<'a> ImageDrawer<'a> {
         let current_pos = Coord::new(start_x, start_y);
 
         ImageDrawer {
-            easel: easel,
+            easel,
             palette: Palette::new(),
-            current_color: current_color,
-            easel_size: easel_size,
-            image_size: image_size,
-            current_pos: current_pos,
-            offset: offset,
+            current_color,
+            easel_size,
+            image_size,
+            current_pos,
+            offset,
         }
     }
 
@@ -93,7 +85,7 @@ impl<'a> ImageDrawer<'a> {
     ///
     /// If the image completely fills the y axis of the easel, this method
     /// does no drawing.
-    pub fn draw_top_border(&mut self) -> Result<(), Error> {
+    pub fn draw_top_border(&mut self) -> Result<(), Box<dyn Error>> {
         for iy in 0..self.offset.y {
             self.easel.draw_line(
                 Coord::new(0, iy),
@@ -123,7 +115,7 @@ impl<'a> ImageDrawer<'a> {
         rgba: &mut Rgba<u8>,
         x: u32,
         y: u32,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Box<dyn Error>> {
         let mut in_coord = Coord::new(x as i32, y as i32);
         in_coord = in_coord + &self.offset;
         let closest_color = self.palette.colormap[self.palette.index_of(rgba)];
@@ -133,10 +125,7 @@ impl<'a> ImageDrawer<'a> {
         if in_coord.y > self.current_pos.y {
             self.easel.draw_line(
                 self.current_pos,
-                Coord::new(
-                    self.image_size.x + self.offset.x,
-                    self.current_pos.y,
-                ),
+                Coord::new(self.image_size.x + self.offset.x, self.current_pos.y),
                 &self.current_color,
             )?;
             self.current_pos = in_coord;
@@ -158,7 +147,7 @@ impl<'a> ImageDrawer<'a> {
     }
 
     /// Draw the bottom white border and clean up the horizontal edges.
-    pub fn cleanup_image(&mut self) -> Result<(), Error> {
+    pub fn cleanup_image(&mut self) -> Result<(), Box<dyn Error>> {
         // Clean up the left-most edge of the picture if one exists.
         let left_edge = self.offset.x - 1;
         if left_edge > 0 {

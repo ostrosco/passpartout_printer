@@ -1,9 +1,9 @@
 extern crate image;
 
-use image::Rgba;
+use crate::coords::Coord;
 use image::imageops::colorops::ColorMap;
+use image::Rgba;
 use std::f32;
-use coords::Coord;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum PaletteColor {
@@ -95,7 +95,7 @@ impl PaletteColor {
             PaletteColor::Violet => [0xd5, 0x5f, 0xd7, 0xff],
             PaletteColor::LightViolet => [0xc1, 0xa7, 0xd7, 0xff],
         };
-        Rgba { data: data }
+        Rgba(data)
     }
 }
 
@@ -148,12 +148,9 @@ impl Palette {
             let col_g = f32::from(hex[1]);
             let col_b = f32::from(hex[2]);
             let col_a = f32::from(hex[3]);
-            let col_r_diff =
-                (col_r - r).powi(2).max((col_r - r + col_a - a).powi(2));
-            let col_g_diff =
-                (col_g - g).powi(2).max((col_g - g + col_a - a).powi(2));
-            let col_b_diff =
-                (col_b - b).powi(2).max((col_b - b + col_a - a).powi(2));
+            let col_r_diff = (col_r - r).powi(2).max((col_r - r + col_a - a).powi(2));
+            let col_g_diff = (col_g - g).powi(2).max((col_g - g + col_a - a).powi(2));
+            let col_b_diff = (col_b - b).powi(2).max((col_b - b + col_a - a).powi(2));
             let curr_color_dist = (col_r_diff + col_g_diff + col_b_diff).sqrt();
             if curr_color_dist < color_dist {
                 index = ix;
@@ -170,10 +167,10 @@ impl ColorMap for Palette {
 
     fn map_color(&self, color: &mut Self::Color) {
         let (_, closest_rgba) = self.get_closest_color(color);
-        color.data[0] = closest_rgba[0];
-        color.data[1] = closest_rgba[1];
-        color.data[2] = closest_rgba[2];
-        color.data[3] = closest_rgba[3];
+        color.0[0] = closest_rgba[0];
+        color.0[1] = closest_rgba[1];
+        color.0[2] = closest_rgba[2];
+        color.0[3] = closest_rgba[3];
     }
 
     fn index_of(&self, color: &Self::Color) -> usize {

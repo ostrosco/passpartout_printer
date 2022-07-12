@@ -1,14 +1,11 @@
-extern crate device_query;
-extern crate failure;
-
-use easel::EaselCoords;
+use crate::coords::Coord;
+use crate::easel::EaselCoords;
+use device_query::{DeviceQuery, DeviceState};
+use std::error::Error;
 use std::thread;
 use std::time::Duration;
-use failure::Error;
-use self::device_query::{DeviceQuery, DeviceState};
-use coords::Coord;
 
-pub fn create_config(path: &str) -> Result<(), Error> {
+pub fn create_config(path: &str) -> Result<(), Box<dyn Error>> {
     println!("This will walk you through creation of a configuration file.");
     println!("First, let's gather the portrait coordinates.");
     println!("This will reset the cursor after each click.");
@@ -21,9 +18,7 @@ pub fn create_config(path: &str) -> Result<(), Error> {
     println!("Please click on the lower right corner of the easel.");
     let portrait_lr = get_pos();
 
-    println!(
-        "Please click on the button to change from portrait to landscape."
-    );
+    println!("Please click on the button to change from portrait to landscape.");
     let orientation = get_pos();
 
     println!("Please click on the upper left corner of the easel.");
@@ -64,15 +59,15 @@ pub fn create_config(path: &str) -> Result<(), Error> {
     let easel_coords = EaselCoords {
         portrait_bounds: (portrait_ul, portrait_lr),
         landscape_bounds: (landscape_ul, landscape_lr),
-        paintbrush: paintbrush,
-        spray_can: spray_can,
-        pen: pen,
-        decrease_brush: decrease_brush,
-        increase_brush: increase_brush,
+        paintbrush,
+        spray_can,
+        pen,
+        decrease_brush,
+        increase_brush,
         change_orientation: orientation,
-        color_start: color_start,
-        color_row_step: color_row_step,
-        color_col_step: color_col_step,
+        color_start,
+        color_row_step,
+        color_col_step,
     };
 
     easel_coords.save(path)

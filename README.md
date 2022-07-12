@@ -10,6 +10,21 @@ This application has one of two main operating modes:
 
 * Shape Drawing Mode: takes a list of coordinates and draws that shape in-game.
 
+# Dependencies
+
+On Linux, you may need to install the libxdo development libraries.
+
+On Ubuntu:
+```
+apt install libxdo-dev
+```
+
+On Fedora:
+
+```
+dnf install libxdo-devel
+```
+
 # Downloading and Compiling
 
 ```
@@ -44,7 +59,7 @@ in the top-level directory.
 # Usage
 
 ```
-Passpartout Printer 1.0.0
+Passpartout Printer 1.1.0
 
 USAGE:
     passpartout_printer [FLAGS] [OPTIONS]

@@ -1,19 +1,14 @@
-extern crate failure;
-
-extern crate enigo;
-extern crate serde;
-extern crate serde_json;
-
-use std::io::{Read, Write};
+use crate::colors::PaletteColor;
+use crate::coords::Coord;
+use enigo::{Enigo, MouseButton, MouseControllable};
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::f32;
 use std::fs::File;
 use std::i32;
-use std::f32;
-use std::time::Duration;
+use std::io::{Read, Write};
 use std::thread;
-use self::failure::Error;
-use self::enigo::{Enigo, MouseButton, MouseControllable};
-use colors::PaletteColor;
-use coords::Coord;
+use std::time::Duration;
 
 #[derive(Serialize, Deserialize)]
 pub struct EaselCoords {
@@ -31,7 +26,7 @@ pub struct EaselCoords {
 }
 
 impl EaselCoords {
-    pub fn new(path: String) -> Result<EaselCoords, Error> {
+    pub fn new(path: String) -> Result<EaselCoords, Box<dyn Error>> {
         let mut file = File::open(path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
@@ -39,7 +34,7 @@ impl EaselCoords {
         Ok(win)
     }
 
-    pub fn save(&self, path: &str) -> Result<(), Error> {
+    pub fn save(&self, path: &str) -> Result<(), Box<dyn Error>> {
         let j = serde_json::to_string_pretty(self)?;
         let mut file = File::create(&path)?;
         file.write_all(j.as_bytes())?;
@@ -53,6 +48,9 @@ pub enum Orientation {
     Landscape,
 }
 
+// Though we don't currently use the Pen or Spraycan options, we're leaving them in the enumeration
+// for completeness.
+#[allow(dead_code)]
 #[derive(PartialEq)]
 pub enum Tool {
     Paintbrush,
@@ -69,13 +67,22 @@ const STARTING_COLOR: PaletteColor = PaletteColor::Black;
 /// From a fresh boot of the game, the paintbrush is the active tool.
 const STARTING_TOOL: Tool = Tool::Paintbrush;
 
-#[derive(Fail, Debug)]
+#[derive(Debug)]
 pub enum EaselError {
-    #[fail(display = "Out of bounds error drawing to the easel")]
     OutOfBounds,
-    #[fail(display = "Drawing requires at least one point.")]
     NoCoord,
 }
+
+impl std::fmt::Display for EaselError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            EaselError::OutOfBounds => write!(f, "out of bounds"),
+            EaselError::NoCoord => write!(f, "invalid coordinates"),
+        }
+    }
+}
+
+impl Error for EaselError {}
 
 pub struct Easel {
     /// The enigo object for manipulating the mouse.
@@ -101,36 +108,29 @@ pub struct Easel {
 }
 
 impl Easel {
-    /// Create a new easel. When creating a new easel, it's important to set
-    /// the mouse wait properly. If you start seeing lines being drawn from
-    /// the easel towards the color palette, you likely need to increase the
-    /// mouse wait time.
+    /// Create a new easel. When creating a new easel, it's important to set the mouse wait
+    /// properly. If you start seeing lines being drawn from the easel towards the color palette,
+    /// you likely need to increase the mouse wait time.
     ///
-    /// Initial experimentation has shown that, regardless of
-    /// FPS, anything lower than 6 ms causes the game to not recognize that
-    /// the mouse button has been released and will make many, many mistakes
-    /// in drawing.
+    /// Initial experimentation has shown that, regardless of FPS, anything lower than 6 ms causes
+    /// the game to not recognize that the mouse button has been released and will make many, many
+    /// mistakes in drawing.
     ///
     /// # Arguments
     ///
-    /// * `path`: Path to the JSON file containing the coordinates of easel
-    ///           elements in-game.
+    /// * `path`: Path to the JSON file containing the coordinates of easel elements in-game.
     /// * `mouse`: An Enigo structure used to manipulate the mouse position.
     /// * `mouse_wait`: The time to wait between mouse operations.
     ///
-    pub fn new(
-        path: String,
-        mouse: Enigo,
-        mouse_wait: Duration,
-    ) -> Result<Easel, Error> {
+    pub fn new(path: String, mouse: Enigo, mouse_wait: Duration) -> Result<Easel, Box<dyn Error>> {
         let easel_coords = EaselCoords::new(path)?;
         let orientation = Orientation::Portrait;
 
         let mut easel = Easel {
-            mouse: mouse,
-            mouse_wait: mouse_wait,
-            easel_coords: easel_coords,
-            orientation: orientation,
+            mouse,
+            mouse_wait,
+            easel_coords,
+            orientation,
             brush_size: 0,
             current_color: STARTING_COLOR,
             current_tool: STARTING_TOOL,
@@ -199,8 +199,8 @@ impl Easel {
         }
     }
 
-    /// Changes from the current color to the desired color. Does nothing
-    /// if the current color is the same as the desired color.
+    /// Changes from the current color to the desired color. Does nothing if the current color is
+    /// the same as the desired color.
     pub fn change_color(&mut self, color: &PaletteColor) {
         if *color != self.current_color {
             let color_pos = color.get_row_col();
@@ -215,23 +215,25 @@ impl Easel {
         }
     }
 
-    /// Changes the brush size in fixed steps by clicking on the brushes
-    /// to increase or decrease the size.
+    /// Changes the brush size in fixed steps by clicking on the brushes to increase or decrease
+    /// the size.
     ///
     /// # Arguments
     ///
-    /// * `brush_size` - The size from 0 to `NUM_BRUSH_STEPS` to change the
-    ///    brush size to.
+    /// * `brush_size` - The size from 0 to `NUM_BRUSH_STEPS` to change the brush size to.
     ///
     /// # Example
     /// ```no_run
-    /// use easel::*;
     /// use enigo::*;
+    /// use passpartout_printer::easel::Easel;
     /// use std::time::Duration;
+    /// use std::error::Error;
     ///
-    /// let mut easel = Easel::new("coords.json", Enigo::new(),
-    ///     Duration::from_millis(6));
-    /// easel.change_brush_size(0); // shrinks the brush to it's minimum size
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut easel = Easel::new("coords.json".into(), Enigo::new(), Duration::from_millis(6))?;
+    /// easel.change_brush_size(0); // shrinks the brush to its minimum size
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn change_brush_size(&mut self, brush_size: i32) {
         // For some reason, changing the brush size is very inconsistent
@@ -267,26 +269,33 @@ impl Easel {
     /// # Example
     ///
     /// ```no_run
-    /// use easel::*;
+    /// use passpartout_printer::{
+    ///     easel::Easel,
+    ///     coords::Coord,
+    ///     colors::PaletteColor,
+    /// };
     /// use enigo::*;
     /// use std::time::Duration;
     /// use image::Rgba;
+    /// use std::error::Error;
     ///
     /// // Draw a black diagonal line from the upper-left corner
     /// // 100 pixels away.
-    /// let mut easel = Easel::new("coords.json", Enigo::new(),
-    ///     Duration::from_millis(6));
-    /// let color = Rgba { data = [0, 0, 0, 255] };
-    /// let start = (0, 0);
-    /// let end = (100, 100);
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut easel = Easel::new("coords.json".into(), Enigo::new(), Duration::from_millis(6))?;
+    /// let color = PaletteColor::Black;
+    /// let start = Coord::new(0, 0);
+    /// let end = Coord::new(100, 100);
     /// easel.draw_line(start, end, &color);
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn draw_line(
         &mut self,
         start_line: Coord,
         end_line: Coord,
         color: &PaletteColor,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Box<dyn Error>> {
         // Translate the coordinates of the picture to coordinates of the easel.
         self.draw_shape(&[start_line, end_line], color, false, false)
     }
@@ -307,7 +316,7 @@ impl Easel {
         color: &PaletteColor,
         close_shape: bool,
         fill: bool,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Box<dyn Error>> {
         let (start, end) = self.get_bounds();
         self.change_color(color);
 
@@ -355,13 +364,8 @@ impl Easel {
     /// * `points` List of coordinates that define the polygon to fill.
     /// * `color` The color to fill the polygon with.
     ///
-    fn fill(
-        &mut self,
-        points: &[Coord],
-        color: &PaletteColor,
-    ) -> Result<(), Error> {
-        let mut edges: Vec<[&Coord; 2]> =
-            points.windows(2).map(|pts| [&pts[0], &pts[1]]).collect();
+    fn fill(&mut self, points: &[Coord], color: &PaletteColor) -> Result<(), Box<dyn Error>> {
+        let mut edges: Vec<[&Coord; 2]> = points.windows(2).map(|pts| [&pts[0], &pts[1]]).collect();
         edges.push([points.first().unwrap(), points.last().unwrap()]);
         let slope: Vec<f32> = edges
             .iter()
@@ -394,19 +398,14 @@ impl Easel {
                     if *m == 0.0 {
                         pts[0].x
                     } else {
-                        (pts[0].x as f32 + 1.0 / m * (iy - pts[0].y) as f32)
-                            as i32
+                        (pts[0].x as f32 + 1.0 / m * (iy - pts[0].y) as f32) as i32
                     }
                 })
                 .collect();
             let mut in_poly = true;
             for x in x_draw.windows(2) {
                 if x[0] != x[1] && in_poly {
-                    self.draw_line(
-                        Coord::new(x[0], iy),
-                        Coord::new(x[1], iy),
-                        color,
-                    )?;
+                    self.draw_line(Coord::new(x[0], iy), Coord::new(x[1], iy), color)?;
                 }
                 in_poly = !in_poly;
             }

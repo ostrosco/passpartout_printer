@@ -1,29 +1,29 @@
 #[macro_use]
 extern crate clap;
-extern crate device_query;
-extern crate enigo;
-extern crate failure;
-extern crate image;
-extern crate passpartout_printer;
 
-use enigo::Enigo;
-use failure::Error;
-use std::time::Duration;
-use std::thread;
-use std::u64;
-use std::sync::mpsc;
-use image::imageops::dither;
-use image::Pixel;
 use clap::App;
 use device_query::{DeviceQuery, DeviceState, Keycode};
+use enigo::Enigo;
+use image::imageops::dither;
+use image::Pixel;
+use std::error::Error;
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+use std::u64;
 
-use passpartout_printer::manual_config;
-use passpartout_printer::easel::Easel;
-use passpartout_printer::colors::Palette;
-use passpartout_printer::image_drawer::size_to_easel;
-use passpartout_printer::image_drawer::ImageDrawer;
+mod colors;
+mod coords;
+mod easel;
+mod image_drawer;
+mod manual_config;
 
-fn app() -> Result<(), Error> {
+use colors::Palette;
+use easel::Easel;
+use image_drawer::size_to_easel;
+use image_drawer::ImageDrawer;
+
+fn app() -> Result<(), Box<dyn Error>> {
     let matches = App::new("Passpartout Printer")
         .version("0.1.0")
         .args_from_usage(
@@ -31,7 +31,8 @@ fn app() -> Result<(), Error> {
             --configure 'Configures the application with coordinates in-game.'
             --enable-dither 'Enables dithering to reduce color banding but increase draw time'
             --no-scale 'Disable scaling of the input image.'
-            -i, --image=[IMAGE] 'Input image to use'")
+            -i, --image=[IMAGE] 'Input image to use'",
+        )
         .get_matches();
 
     if matches.occurrences_of("configure") > 0 {
@@ -46,9 +47,7 @@ fn app() -> Result<(), Error> {
         let mut prev = false;
         loop {
             let key_pressed = device_state.get_keys();
-            if key_pressed.contains(&Keycode::Space)
-                && key_pressed.contains(&Keycode::LControl)
-            {
+            if key_pressed.contains(&Keycode::Space) && key_pressed.contains(&Keycode::LControl) {
                 prev = true;
             } else if prev {
                 prev = false;
@@ -63,14 +62,8 @@ fn app() -> Result<(), Error> {
         .expect("Please enter a path to the image to draw.")
         .to_string();
     let mouse_wait: u64 = value_t!(matches, "mouse-wait", u64).unwrap_or(7);
-    let enable_dither: bool = match matches.occurrences_of("enable-dither") {
-        0 => false,
-        _ => true,
-    };
-    let enable_scale: bool = match matches.occurrences_of("no-scale") {
-        0 => true,
-        _ => false,
-    };
+    let enable_dither: bool = !matches!(matches.occurrences_of("enable-dither"), 0);
+    let enable_scale: bool = matches!(matches.occurrences_of("no-scale"), 0);
 
     println!("Printing to Passpartout with the following settings:");
     println!("-- image: {}", image_path);
@@ -85,9 +78,9 @@ fn app() -> Result<(), Error> {
     let enigo = Enigo::new();
     let mut easel = Easel::new(easel_config, enigo, wait_time)?;
     let mut image = if enable_scale {
-        size_to_easel(&image::open(image_path)?, &easel).to_rgba()
+        size_to_easel(&image::open(image_path)?, &easel).into_rgba8()
     } else {
-        image::open(image_path)?.to_rgba()
+        image::open(image_path)?.into_rgba8()
     };
     let palette = Palette::new();
     if enable_dither {

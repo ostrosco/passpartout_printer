@@ -1,5 +1,4 @@
-extern crate serde;
-
+use serde::{Deserialize, Serialize};
 use std::convert::From;
 use std::ops::{Add, Mul, Sub};
 
@@ -11,7 +10,7 @@ pub struct Coord {
 
 impl Coord {
     pub fn new(x: i32, y: i32) -> Coord {
-        Coord { x: x, y: y }
+        Coord { x, y }
     }
 
     pub fn from_slice(coords: &[(i32, i32)]) -> Vec<Coord> {

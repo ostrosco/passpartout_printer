@@ -1,21 +1,15 @@
-extern crate enigo;
-extern crate failure;
 extern crate passpartout_printer;
 
-use std::time::Duration;
 use enigo::Enigo;
-use passpartout_printer::easel::Easel;
 use passpartout_printer::colors::PaletteColor;
-use failure::Error;
 use passpartout_printer::coords::Coord;
+use passpartout_printer::easel::Easel;
+use std::time::Duration;
+use std::error::Error;
 
-fn app() -> Result<(), Error> {
+fn app() -> Result<(), Box<dyn Error>> {
     let enigo = Enigo::new();
-    let mut easel = Easel::new(
-        "coords.json".to_string(),
-        enigo,
-        Duration::from_millis(10),
-    )?;
+    let mut easel = Easel::new("coords.json".to_string(), enigo, Duration::from_millis(10))?;
 
     // First, draw the background sky.
     easel.change_brush_size(16);
@@ -52,13 +46,7 @@ fn app() -> Result<(), Error> {
     easel.draw_shape(points, &PaletteColor::LightBrown, true, true)?;
 
     // Lastly, draw a star to show off the scanline fill algorithm.
-    let points = Coord::from_slice(&[
-        (100, 75),
-        (50, 200),
-        (175, 125),
-        (25, 125),
-        (150, 200),
-    ]);
+    let points = Coord::from_slice(&[(100, 75), (50, 200), (175, 125), (25, 125), (150, 200)]);
     easel.draw_shape(&points, &PaletteColor::Yellow, true, true)?;
 
     Ok(())
