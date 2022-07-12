@@ -25,7 +25,7 @@ use image_drawer::ImageDrawer;
 
 fn app() -> Result<(), Box<dyn Error>> {
     let matches = App::new("Passpartout Printer")
-        .version("0.1.0")
+        .version(crate_version!())
         .args_from_usage(
             "-w, --mouse-wait=[WAIT] 'Specify the time to wait between mouse actions'
             --configure 'Configures the application with coordinates in-game.'
