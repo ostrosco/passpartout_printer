@@ -4,8 +4,8 @@ use enigo::Enigo;
 use passpartout_printer::colors::PaletteColor;
 use passpartout_printer::coords::Coord;
 use passpartout_printer::easel::Easel;
-use std::time::Duration;
 use std::error::Error;
+use std::time::Duration;
 
 fn app() -> Result<(), Box<dyn Error>> {
     let enigo = Enigo::new();

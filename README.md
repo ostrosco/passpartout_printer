@@ -27,6 +27,14 @@ dnf install libxdo-devel
 
 # Downloading and Compiling
 
+The easiest way to get passpartout_printer installed is to use `cargo install`:
+
+```
+cargo install passpartout_printer
+```
+
+If you have a need to build from source, you can build it as follows:
+
 ```
 git clone https://github.com/ostrosco/passpartout_printer.git
 cd passpartout_printer
@@ -54,7 +62,6 @@ in the top-level directory.
   a click is too far off the easel, some line draws starting or ending near the
   edges will fail.
 * Try to click on the direct center of the colors.
-
 
 # Usage
 
@@ -115,11 +122,11 @@ cargo run --release --example draw_house
 
 Graffiti - Artist Unknown. Dithering disabled. 1 hour draw time at 6ms wait.
 
-![](screenshots/graffiti.png)
+<img src="screenshots/graffiti.png">
 
 Lotus Pond - [Jessica T. Hamilton](https://www.reddit.com/user/JessicaTHamilton). Dithering enabled. 2 hour 45 minute draw time at 6ms wait.
 
-![](screenshots/lotus_pond_jessica_hamilton.png)
+<img src="screenshots/lotus_pond_jessica_hamilton.png">
 
 Mona Lisa - Leonardo da Vinci. Dithering enabled. 3 hour 30 minute draw time at 7ms wait.
-![](screenshots/mona_lisa_dither.png)
+<img src="screenshots/mona_lisa_dither.png">

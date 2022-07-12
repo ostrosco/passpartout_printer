@@ -5,6 +5,8 @@ use std::error::Error;
 use std::thread;
 use std::time::Duration;
 
+/// A utility function for gathering locations of items in-game and generating a configuration
+/// file to be used to draw images.
 pub fn create_config(path: &str) -> Result<(), Box<dyn Error>> {
     println!("This will walk you through creation of a configuration file.");
     println!("First, let's gather the portrait coordinates.");
@@ -73,7 +75,7 @@ pub fn create_config(path: &str) -> Result<(), Box<dyn Error>> {
     easel_coords.save(path)
 }
 
-pub fn get_pos() -> Coord {
+fn get_pos() -> Coord {
     let mut mouse_pos = (0, 0);
     let device_query = DeviceState::new();
 

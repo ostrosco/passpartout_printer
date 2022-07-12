@@ -8,6 +8,7 @@ use image::GenericImageView;
 use image::Rgba;
 use std::error::Error;
 
+/// A structure that provides means to draw whole images to the easel.
 pub struct ImageDrawer<'a> {
     easel: &'a mut Easel,
     palette: Palette,
@@ -26,6 +27,7 @@ pub struct ImageDrawer<'a> {
     offset: Coord,
 }
 
+/// A helper function for scaling images to the dimensions of the easel prior to drawing.
 pub fn size_to_easel(image: &DynamicImage, easel: &Easel) -> DynamicImage {
     let (size_x, size_y) = image.dimensions();
     let (ul_corner, br_corner) = if size_x > size_y {

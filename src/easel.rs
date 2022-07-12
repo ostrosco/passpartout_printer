@@ -11,6 +11,7 @@ use std::thread;
 use std::time::Duration;
 
 #[derive(Serialize, Deserialize)]
+/// A structure containing the location of all the tools on the easel.
 pub struct EaselCoords {
     pub portrait_bounds: (Coord, Coord),
     pub landscape_bounds: (Coord, Coord),
@@ -43,6 +44,7 @@ impl EaselCoords {
 }
 
 #[derive(PartialEq)]
+/// An enumeration that describes the two orientations the canvas can be.
 pub enum Orientation {
     Portrait,
     Landscape,
@@ -51,6 +53,8 @@ pub enum Orientation {
 // Though we don't currently use the Pen or Spraycan options, we're leaving them in the enumeration
 // for completeness.
 #[allow(dead_code)]
+
+/// A list of the tools that Passpartout provides for drawing.
 #[derive(PartialEq)]
 pub enum Tool {
     Paintbrush,
@@ -68,6 +72,7 @@ const STARTING_COLOR: PaletteColor = PaletteColor::Black;
 const STARTING_TOOL: Tool = Tool::Paintbrush;
 
 #[derive(Debug)]
+/// A list of potential errors that can occur while drawing to the easel.
 pub enum EaselError {
     OutOfBounds,
     NoCoord,
@@ -84,8 +89,10 @@ impl std::fmt::Display for EaselError {
 
 impl Error for EaselError {}
 
+/// A structure keeping track of the current state of the easel and provides means to change
+/// the state of the easel via mouse clicks.
 pub struct Easel {
-    /// The enigo object for manipulating the mouse.
+    /// The object for manipulating the mouse.
     pub mouse: Enigo,
 
     /// The amount of time to wait between mouse moves and clicks.
