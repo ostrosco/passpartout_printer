@@ -7,7 +7,7 @@ homepage = "https://github.com/ostrosco/passpartout_printer"
 repository = "https://github.com/ostrosco/passpartout_printer"
 readme = "README.md"
 keywords = ["art", "draw", "passpartout", "image"]
-license = "MIT"
+license = "GPL-3.0-or-later"
 edition = "2021"
 
 [dependencies]
