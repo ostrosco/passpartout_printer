@@ -1,6 +1,6 @@
 [package]
 name = "passpartout_printer"
-version = "1.1.0"
+version = "1.1.1"
 authors = ["ostrosco <ostrosco@fastmail.fm>"]
 description = "Application for drawing images into the game Passpartout: The Starving Artist."
 homepage = "https://github.com/ostrosco/passpartout_printer"
