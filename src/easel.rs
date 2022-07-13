@@ -160,21 +160,20 @@ impl Easel {
         Ok(easel)
     }
 
-    fn click(&mut self, wait_time: Option<Duration>) {
-        let mouse_wait = match wait_time {
-            Some(w) => w,
-            None => self.mouse_wait,
-        };
+    fn click_custom_wait(&mut self, wait: Duration) {
         self.mouse.mouse_down(MouseButton::Left);
-        thread::sleep(mouse_wait);
+        thread::sleep(wait);
         self.mouse.mouse_up(MouseButton::Left);
-        thread::sleep(mouse_wait);
+        thread::sleep(wait);
+    }
+
+    fn click(&mut self) {
+        self.click_custom_wait(self.mouse_wait);
     }
 
     fn move_and_click(&mut self, coord: &Coord) {
         self.mouse.mouse_move_to(coord.x, coord.y);
-        thread::sleep(self.mouse_wait);
-        self.click(None);
+        self.click();
     }
 
     /// Toggles the orientation of the easel.
@@ -259,8 +258,7 @@ impl Easel {
         let num_clicks = (brush_size - self.brush_size).abs();
         self.move_and_click(&brush_coords);
         for _ in 1..num_clicks {
-            self.click(Some(mouse_wait));
-            thread::sleep(mouse_wait);
+            self.click_custom_wait(mouse_wait);
         }
         self.brush_size = brush_size;
     }

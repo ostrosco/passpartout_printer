@@ -1,5 +1,3 @@
-extern crate image;
-
 use crate::coords::Coord;
 use image::imageops::colorops::ColorMap;
 use image::Rgba;
