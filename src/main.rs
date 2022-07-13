@@ -11,7 +11,7 @@ use image::Pixel;
 use std::error::Error;
 use std::sync::mpsc;
 use std::thread;
-use std::time::Duration;
+use std::time::{Instant, Duration};
 use std::u64;
 
 mod colors;
@@ -55,6 +55,7 @@ fn app() -> Result<(), Box<dyn Error>> {
                 prev = false;
                 tx.send(()).unwrap();
             }
+            thread::sleep(Duration::from_millis(100));
         }
     });
 
@@ -94,21 +95,25 @@ fn app() -> Result<(), Box<dyn Error>> {
     image_drawer.draw_top_border()?;
 
     let mut paused = false;
+    let mut check_pause = Instant::now();
     for (x, y, pixel) in image.enumerate_pixels_mut() {
         // Loop to handle pausing drawing so the user can actually get control
         // of their machine again.
-        loop {
-            if let Ok(()) = rx.try_recv() {
-                paused = !paused;
-                if paused {
-                    println!("Pausing printing.");
-                } else {
-                    println!("Resuming printing.");
+        if check_pause.elapsed() >= Duration::from_millis(100) {
+            loop {
+                if let Ok(()) = rx.try_recv() {
+                    paused = !paused;
+                    if paused {
+                        println!("Pausing printing.");
+                    } else {
+                        println!("Resuming printing.");
+                    }
+                }
+                if !paused {
+                    break;
                 }
             }
-            if !paused {
-                break;
-            }
+            check_pause = Instant::now();
         }
 
         let mut rgba = pixel.to_rgba();
