@@ -1,5 +1,7 @@
 # Passpartout Printer
 
+# Note: This repo has been relocated to https://codeberg.org/ostrosco/passpartout_printer. Any future work will take place there.
+
 Draws images into the game [Passpartout: The Starving Artist](http://store.steampowered.com/app/582550/Passpartout_The_Starving_Artist/).
 
 ![Drawing our favorite crab. Original draw time 7 minutes.](https://thumbs.gfycat.com/SevereViciousBittern-size_restricted.gif)
